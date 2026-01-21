@@ -1,5 +1,6 @@
 "use client";
 
+import { BookingCardSkeleton } from "@/components/skeletons/BookingCardSkeleton";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -44,22 +45,7 @@ export default function MyBookingsPage() {
             <h1 className="text-2xl font-bold text-white mb-6">My Bookings</h1>
             <div className="grid gap-4">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-gray-900 rounded-xl p-4 border border-gray-800 flex gap-4 items-center animate-pulse">
-                        <div className="w-16 h-24 bg-gray-800 rounded-lg shrink-0"></div>
-                        <div className="flex-1 space-y-3">
-                            <div className="flex justify-between items-start">
-                                <div className="space-y-2 w-2/3">
-                                    <div className="h-5 bg-gray-800 rounded w-3/4"></div>
-                                    <div className="h-4 bg-gray-800 rounded w-1/2"></div>
-                                </div>
-                                <div className="h-6 w-20 bg-gray-800 rounded"></div>
-                            </div>
-                            <div className="flex justify-between items-end">
-                                <div className="h-4 bg-gray-800 rounded w-1/3"></div>
-                                <div className="h-9 w-24 bg-gray-800 rounded-lg"></div>
-                            </div>
-                        </div>
-                    </div>
+                    <BookingCardSkeleton key={i} />
                 ))}
             </div>
         </div>

@@ -1,4 +1,5 @@
 import dbConnect from "@/lib/db";
+import logger from "@/lib/logger";
 import Booking from "@/models/Booking";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ received: true }, { status: 200 });
 
   } catch (error) {
-    console.error("Webhook error:", error);
+    logger.error("Webhook error:", error);
     return NextResponse.json({ message: "Server Error" }, { status: 500 });
   }
 }

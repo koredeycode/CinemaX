@@ -35,6 +35,13 @@ export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, salt);
 }
 
+// ... existing codes
 export async function comparePassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash);
+}
+
+export function getUserFromRequest(req: Request): TokenPayload | null {
+  const token = req.headers.get("cookie")?.split("; ").find(c => c.startsWith("auth-token="))?.split("=")[1];
+  if (!token) return null;
+  return verifyToken(token);
 }

@@ -2,6 +2,7 @@ import Concession from "@/models/Concession";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
 import dbConnect from "../src/lib/db";
+import logger from "../src/lib/logger";
 import Booking from "../src/models/Booking";
 import Movie from "../src/models/Movie";
 import Showtime from "../src/models/Showtime";
@@ -137,19 +138,19 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function seed() {
-  console.log("🌱 Starting Database Seed...");
+  logger.info("🌱 Starting Database Seed...");
 
   try {
     await dbConnect();
     // 1. Clear Database
-    console.log("🧹 Clearing existing data...");
+    logger.info("🧹 Clearing existing data...");
     await Booking.deleteMany({});
     await Showtime.deleteMany({});
     await Movie.deleteMany({});
     await User.deleteMany({});
 
     // 2. Seed Users
-    console.log("👥 Seeding Users...");
+    logger.info("👥 Seeding Users...");
     const adminPassword = await hashPassword("admin123");
     const userPassword = await hashPassword("user123");
 
@@ -167,16 +168,16 @@ async function seed() {
       role: "user"
     });
 
-    console.log(`   - Created Admin: admin@cinemax.com / admin123`);
-    console.log(`   - Created User: user@cinemax.com / user123`);
+    logger.info(`   - Created Admin: admin@cinemax.com / admin123`);
+    logger.info(`   - Created User: user@cinemax.com / user123`);
 
     // 3. Seed Movies
-    console.log("🎬 Seeding Movies...");
+    logger.info("🎬 Seeding Movies...");
     const movies = await Movie.insertMany(sampleMovies);
-    console.log(`   - Added ${movies.length} movies`);
+    logger.info(`   - Added ${movies.length} movies`);
 
     // 4. Seed Showtimes
-    console.log("📅 Seeding Showtimes...");
+    logger.info("📅 Seeding Showtimes...");
     const showtimes = [];
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -211,15 +212,15 @@ async function seed() {
     }
 
     const createdShowtimes = await Showtime.insertMany(showtimes);
-    console.log(`   - Added ${createdShowtimes.length} showtimes`);
+    logger.info(`   - Added ${createdShowtimes.length} showtimes`);
 
     // 5. Seed Concessions
-    console.log("🍿 Seeding Concessions...");
+    logger.info("🍿 Seeding Concessions...");
     const concessions = await Concession.insertMany(concessionItems);
-    console.log(`   - Added ${concessions.length} concessions`);
+    logger.info(`   - Added ${concessions.length} concessions`);
 
     // 6. Seed Bookings
-    console.log("🎟️ Seeding Bookings...");
+    logger.info("🎟️ Seeding Bookings...");
     const user = await User.findOne({ email: "user@cinemax.com" });
     
     if (user && createdShowtimes.length > 0) {
@@ -252,7 +253,7 @@ async function seed() {
             paymentIntentId: "SEED-REF-002"
         });
 
-        console.log(`   - Created 2 sample bookings for ${user.email}`);
+        logger.info(`   - Created 2 sample bookings for ${user.email}`);
 
         // Update showtimes to reflect booked seats
         await Showtime.updateOne(
@@ -263,11 +264,11 @@ async function seed() {
          // Let's perform cleanup/reset if re-seeding, which is handled at the top.
     }
 
-    console.log("✅ Seeding Complete!");
+    logger.info("✅ Seeding Complete!");
     process.exit(0);
 
   } catch (error) {
-    console.error("❌ Seeding failed:", error);
+    logger.error("❌ Seeding failed:", error);
     process.exit(1);
   }
 }

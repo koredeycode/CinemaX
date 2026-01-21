@@ -1,12 +1,17 @@
 import dbConnect from "@/lib/db";
-import Showtime from "@/models/Showtime";
+import { IMovie } from "@/models/Movie"; // Ensure this is exported from Movie.ts
+import Showtime, { IShowtime } from "@/models/Showtime";
 import Link from "next/link";
+
+interface PopulatedShowtime extends Omit<IShowtime, "movie"> {
+    movie: IMovie;
+}
 
 async function getShowtimes() {
     await dbConnect();
     // Populate movie details
     const showtimes = await Showtime.find({}).populate("movie").sort({ startTime: 1 });
-    return showtimes;
+    return showtimes as unknown as PopulatedShowtime[];
 }
 
 export default async function AdminShowtimesPage() {
@@ -36,7 +41,7 @@ export default async function AdminShowtimesPage() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-800">
-                        {showtimes.map((st: any) => (
+                        {showtimes.map((st) => (
                             <tr key={String(st._id)} className="hover:bg-gray-800/50">
                                 <td className="px-6 py-4 font-medium text-white">{st.movie?.title || "Unknown Movie"}</td>
                                 <td className="px-6 py-4">{new Date(st.startTime).toLocaleDateString()}</td>

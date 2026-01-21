@@ -1,17 +1,12 @@
 import clsx from "clsx";
-import { twMerge } from "tailwind-merge";
+import { HTMLAttributes } from "react";
 
-function cn(...inputs: (string | undefined | null | false)[]) {
-  return twMerge(clsx(inputs));
-}
+interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {}
 
-export function Skeleton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function Skeleton({ className, ...props }: SkeletonProps) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-gray-700/50", className)}
+      className={clsx("animate-pulse rounded-md bg-gray-800", className)}
       {...props}
     />
   );

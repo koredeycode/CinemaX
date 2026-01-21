@@ -1,6 +1,8 @@
+import { getUserFromRequest } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import logger from "@/lib/logger";
 import Booking from "@/models/Booking";
+import { IMovie } from "@/models/Movie";
 import Showtime from "@/models/Showtime";
 import { NextRequest, NextResponse } from "next/server";
 import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
@@ -8,10 +10,11 @@ import QRCode from "qrcode";
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: Promise<{ bookingId: string }> }
+    props: { params: Promise<{ bookingId: string }> }
 ) {
+    const params = await props.params;
     await dbConnect();
-    const { bookingId } = await params;
+    const { bookingId } = params;
 
     try {
         const booking = await Booking.findById(bookingId).populate("showtime");
@@ -19,12 +22,21 @@ export async function GET(
             return NextResponse.json({ error: "Booking not found" }, { status: 404 });
         }
 
+        // Security Check: Verify ownership if locked to a user
+        if (booking.user) {
+            const userPayload = getUserFromRequest(req);
+            if (!userPayload || userPayload.userId !== booking.user.toString()) {
+                logger.warn(`Unauthorized ticket access attempt: User ${userPayload?.userId} tried to access booking ${bookingId}`);
+                return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+            }
+        }
+
         const showtime = await Showtime.findById(booking.showtime).populate("movie");
         if (!showtime) {
              return NextResponse.json({ error: "Showtime not found" }, { status: 404 });
         }
         
-        const movie = showtime.movie as any;
+        const movie = showtime.movie as unknown as IMovie;
         const dateStr = new Date(showtime.startTime).toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const timeStr = new Date(showtime.startTime).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' });
 
