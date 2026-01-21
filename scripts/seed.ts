@@ -1,0 +1,275 @@
+import Concession from "@/models/Concession";
+import bcrypt from "bcryptjs";
+import "dotenv/config";
+import dbConnect from "../src/lib/db";
+import Booking from "../src/models/Booking";
+import Movie from "../src/models/Movie";
+import Showtime from "../src/models/Showtime";
+import User from "../src/models/User";
+
+const sampleMovies = [
+  {
+    title: "Dune: Part Two",
+    slug: "dune-part-two",
+    description: "Paul Atreides unites with Chani and the Fremen while on a warpath of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, he endeavors to prevent a terrible future only he can foresee.",
+    posterUrl: "https://image.tmdb.org/t/p/original/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg",
+    trailerUrl: "https://www.youtube.com/embed/Way9Dexny3w",
+    rating: "PG-13",
+    runtime: 166,
+    genres: ["Sci-Fi", "Adventure", "Drama"]
+  },
+  {
+    title: "Oppenheimer",
+    slug: "oppenheimer",
+    description: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.",
+    posterUrl: "https://image.tmdb.org/t/p/original/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/ycnO0cjsAROSGJKuMODgRtWsHQw.jpg",
+    trailerUrl: "https://www.youtube.com/embed/uYPbbksJxIg",
+    rating: "R",
+    runtime: 180,
+    genres: ["Biography", "Drama", "History"]
+  },
+  {
+    title: "Barbie",
+    slug: "barbie",
+    description: "Barbie and Ken are having the time of their lives in the colorful and seemingly perfect world of Barbie Land. However, when they get a chance to go to the real world, they soon discover the joys and perils of living among humans.",
+    posterUrl: "https://image.tmdb.org/t/p/original/vJ4r8imQ9piseO9ufCwsopBBWnZ.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/3N5QNUqS76GFYNoEayfkkJyAyTN.jpg",
+    trailerUrl: "https://www.youtube.com/embed/pBk4NYhWNMM",
+    rating: "PG-13",
+    runtime: 114,
+    genres: ["Adventure", "Comedy", "Fantasy"]
+  },
+  {
+    title: "The Dark Knight",
+    slug: "the-dark-knight",
+    description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+    posterUrl: "https://image.tmdb.org/t/p/original/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg",
+    trailerUrl: "https://www.youtube.com/embed/EXeTwQWrcwY",
+    rating: "PG-13",
+    runtime: 152,
+    genres: ["Action", "Crime", "Drama"]
+  },
+  {
+    title: "Inception",
+    slug: "inception",
+    description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+    posterUrl: "https://image.tmdb.org/t/p/original/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/ii8QGacT3MXESqBckQlyrATY0lT.jpg",
+    trailerUrl: "https://www.youtube.com/embed/YoHD9XEInc0",
+    rating: "PG-13",
+    runtime: 148,
+    genres: ["Action", "Adventure", "Sci-Fi"]
+  },
+  {
+    title: "Spider-Man: Across the Spider-Verse",
+    slug: "spider-man-across-the-spider-verse",
+    description: "Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its very existence. When the heroes clash on how to handle a new threat, Miles must redefine what it means to be a hero.",
+    posterUrl: "https://image.tmdb.org/t/p/original/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/4HodYYKEIsGOdinkGi2Ucz6X9i0.jpg",
+    trailerUrl: "https://www.youtube.com/embed/cqGjhVJWtEg",
+    rating: "PG",
+    runtime: 140,
+    genres: ["Animation", "Action", "Adventure"]
+  },
+  {
+    title: "Interstellar",
+    slug: "interstellar",
+    description: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+    posterUrl: "https://image.tmdb.org/t/p/original/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/rAiYTfKGqDCRIIqo664sY9XZIvQ.jpg",
+    trailerUrl: "https://www.youtube.com/embed/zSWdZVtXT7E",
+    rating: "PG-13",
+    runtime: 169,
+    genres: ["Adventure", "Drama", "Sci-Fi"]
+  },
+  {
+    title: "Pulp Fiction",
+    slug: "pulp-fiction",
+    description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+    posterUrl: "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/96hiUXEuYsu4tcnvlaY8tEMFM0m.jpg",
+    trailerUrl: "https://www.youtube.com/embed/s7EdQ4FqbhY",
+    rating: "R",
+    runtime: 154,
+    genres: ["Crime", "Drama"]
+  },
+  {
+    title: "The Matrix",
+    slug: "the-matrix",
+    description: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
+    posterUrl: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/fNG7i7RqMErkcqhohV2a6cV1Ehy.jpg",
+    trailerUrl: "https://www.youtube.com/embed/vKQi3bBA1y8",
+    rating: "R",
+    runtime: 136,
+    genres: ["Action", "Sci-Fi"]
+  },
+  {
+    title: "Avatar: The Way of Water",
+    slug: "avatar-the-way-of-water",
+    description: "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.",
+    posterUrl: "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg",
+    trailerUrl: "https://www.youtube.com/embed/d9MyqFCD6sQ",
+    rating: "PG-13",
+    runtime: 192,
+    genres: ["Sci-Fi", "Adventure", "Action"]
+  }
+];
+
+const concessionItems = [
+    { name: "Popcorn (Large)", price: 1500, emoji: "🍿", category: "food" },
+    { name: "Popcorn (Medium)", price: 1200, emoji: "🍿", category: "food" },
+    { name: "Soda (Large)", price: 800, emoji: "🥤", category: "drink" },
+    { name: "Soda (Medium)", price: 600, emoji: "🥤", category: "drink" },
+    { name: "Candy Bar", price: 500, emoji: "🍬", category: "snack" },
+    { name: "Nachos & Cheese", price: 1800, emoji: "🧀", category: "food" },
+    { name: "Hot Dog", price: 1200, emoji: "🌭", category: "food" },
+    { name: "Water", price: 300, emoji: "💧", category: "drink" },
+];
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = await bcrypt.genSalt(12);
+  return bcrypt.hash(password, salt);
+}
+
+async function seed() {
+  console.log("🌱 Starting Database Seed...");
+
+  try {
+    await dbConnect();
+    // 1. Clear Database
+    console.log("🧹 Clearing existing data...");
+    await Booking.deleteMany({});
+    await Showtime.deleteMany({});
+    await Movie.deleteMany({});
+    await User.deleteMany({});
+
+    // 2. Seed Users
+    console.log("👥 Seeding Users...");
+    const adminPassword = await hashPassword("admin123");
+    const userPassword = await hashPassword("user123");
+
+    await User.create({
+      name: "Admin User",
+      email: "admin@cinemax.com",
+      password: adminPassword,
+      role: "admin"
+    });
+
+    await User.create({
+      name: "John Doe",
+      email: "user@cinemax.com",
+      password: userPassword,
+      role: "user"
+    });
+
+    console.log(`   - Created Admin: admin@cinemax.com / admin123`);
+    console.log(`   - Created User: user@cinemax.com / user123`);
+
+    // 3. Seed Movies
+    console.log("🎬 Seeding Movies...");
+    const movies = await Movie.insertMany(sampleMovies);
+    console.log(`   - Added ${movies.length} movies`);
+
+    // 4. Seed Showtimes
+    console.log("📅 Seeding Showtimes...");
+    const showtimes = [];
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    // Create showtimes for the next 3 days
+    for (let i = 0; i < 3; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+
+        for (const movie of movies) {
+            // Randomly pick 2-3 showtimes per movie per day
+            const slots = [10, 14, 18, 21]; // 10AM, 2PM, 6PM, 9PM
+            
+            for (const hour of slots) {
+                if (Math.random() > 0.7) continue; // Skip some slots randomly
+
+                const startTime = new Date(date);
+                startTime.setHours(hour, 0, 0, 0);
+
+                // Add random minutes (00, 15, 30, 45)
+                startTime.setMinutes([0, 15, 30, 45][Math.floor(Math.random() * 4)]);
+
+                showtimes.push({
+                    movie: movie._id,
+                    startTime: startTime,
+                    price: 3000 + Math.floor(Math.random() * 5000), // ₦3000 - ₦8000
+                    seatMap: { rows: 8, cols: 12, unavailable: [] },
+                    bookedSeats: []
+                });
+            }
+        }
+    }
+
+    const createdShowtimes = await Showtime.insertMany(showtimes);
+    console.log(`   - Added ${createdShowtimes.length} showtimes`);
+
+    // 5. Seed Concessions
+    console.log("🍿 Seeding Concessions...");
+    const concessions = await Concession.insertMany(concessionItems);
+    console.log(`   - Added ${concessions.length} concessions`);
+
+    // 6. Seed Bookings
+    console.log("🎟️ Seeding Bookings...");
+    const user = await User.findOne({ email: "user@cinemax.com" });
+    
+    if (user && createdShowtimes.length > 0) {
+        const booking1Showtime = createdShowtimes[0];
+        const booking2Showtime = createdShowtimes[1];
+
+        // Booking 1: Confirmed
+        await Booking.create({
+            user: user._id,
+            userEmail: user.email,
+            showtime: booking1Showtime._id,
+            seats: ["D4", "D5"],
+            foodDetails: [
+                { id: concessions[0]._id.toString(), name: concessions[0].name, qty: 1, cost: concessions[0].price },
+                { id: concessions[2]._id.toString(), name: concessions[2].name, qty: 2, cost: concessions[2].price }
+            ],
+            totalPrice: (booking1Showtime.price * 2) + concessions[0].price + (concessions[2].price * 2),
+            status: "confirmed",
+            paymentIntentId: "SEED-REF-001"
+        });
+
+        // Booking 2: Pending
+        await Booking.create({
+            user: user._id,
+            userEmail: user.email,
+            showtime: booking2Showtime._id,
+            seats: ["F10"],
+            totalPrice: booking2Showtime.price,
+            status: "pending", // Emulate an abandoned checkout
+            paymentIntentId: "SEED-REF-002"
+        });
+
+        console.log(`   - Created 2 sample bookings for ${user.email}`);
+
+        // Update showtimes to reflect booked seats
+        await Showtime.updateOne(
+            { _id: booking1Showtime._id },
+            { $push: { bookedSeats: { $each: ["D4", "D5"] } } }
+        );
+         // Note: Pending booking usually reserves seats temporarily, but for seed simplicity we might skip or add them. 
+         // Let's perform cleanup/reset if re-seeding, which is handled at the top.
+    }
+
+    console.log("✅ Seeding Complete!");
+    process.exit(0);
+
+  } catch (error) {
+    console.error("❌ Seeding failed:", error);
+    process.exit(1);
+  }
+}
+
+seed();
