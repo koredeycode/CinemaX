@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -56,7 +57,7 @@ export default function AdminComplaintsPage() {
       }
   };
 
-  if (loading) return <div className="text-white">Loading complaints...</div>;
+
 
   return (
     <div>
@@ -75,7 +76,23 @@ export default function AdminComplaintsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800 text-gray-300">
-            {complaints.length === 0 ? (
+            {loading ? (
+                 Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                        <td className="p-4">
+                            <div className="space-y-1">
+                                <Skeleton className="w-32 h-4" />
+                                <Skeleton className="w-24 h-3" />
+                            </div>
+                        </td>
+                        <td className="p-4"><Skeleton className="w-48 h-4" /></td>
+                        <td className="p-4"><Skeleton className="w-64 h-4" /></td>
+                        <td className="p-4"><Skeleton className="w-24 h-6" /></td>
+                        <td className="p-4"><Skeleton className="w-24 h-4" /></td>
+                        <td className="p-4"><Skeleton className="w-20 h-6" /></td>
+                    </tr>
+                 ))
+            ) : complaints.length === 0 ? (
                 <tr>
                     <td colSpan={6} className="p-8 text-center text-gray-500">No complaints found.</td>
                 </tr>

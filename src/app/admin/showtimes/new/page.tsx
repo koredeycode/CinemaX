@@ -96,7 +96,7 @@ export default function NewShowtimePage() {
             </div>
 
             <div>
-                <label className="block text-sm text-gray-400 mb-1">Price ($)</label>
+                <label className="block text-sm text-gray-400 mb-1">Price (₦)</label>
                 <input type="number" name="price" required value={formData.price} onChange={handleChange} className="w-full bg-gray-800 border-gray-700 rounded-lg px-4 py-2 text-white" />
             </div>
 

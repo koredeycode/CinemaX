@@ -1,12 +1,7 @@
-import clsx from "clsx";
-import { HTMLAttributes } from "react";
-
-interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {}
-
-export function Skeleton({ className, ...props }: SkeletonProps) {
+export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={clsx("animate-pulse rounded-md bg-gray-800", className)}
+      className={`animate-pulse rounded-md bg-gray-800/50 ${className ?? ''}`}
       {...props}
     />
   );

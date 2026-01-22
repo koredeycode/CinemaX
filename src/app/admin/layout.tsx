@@ -18,9 +18,9 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="flex min-h-screen bg-black">
+    <div className="flex h-screen bg-black">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 border-r border-gray-800 hidden md:flex flex-col">
+      <aside className="w-64 h-auto bg-gray-900 border-r border-gray-800 hidden md:flex flex-col">
         <div className="p-6">
           <h2 className="text-2xl font-bold text-primary">CinemaX Admin</h2>
         </div>

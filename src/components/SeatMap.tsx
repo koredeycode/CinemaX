@@ -276,7 +276,7 @@ export default function SeatMap({ showtime, userId }: SeatMapProps) {
                         onClick={handleConfirm}
                         className="bg-[#e50914] text-white px-10 py-4 rounded-xl font-bold hover:bg-[#b00710] transition-colors shadow-lg shadow-[#e50914]/25 whitespace-nowrap"
                     >
-                        Confirm Booking
+                        Continue Booking
                     </button>
                 </div>
             </div>

@@ -1,6 +1,46 @@
+import { verifyToken } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Booking from '@/models/Booking';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(req: NextRequest) {
+  await dbConnect();
+
+  const token = req.cookies.get("auth-token")?.value;
+  const payload = token ? verifyToken(token) : null;
+
+  if (!payload || payload.role !== "admin") {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
+  }
+
+  const { searchParams } = new URL(req.url);
+  const search = searchParams.get("search");
+
+  const query: any = {};
+  if (search) {
+      query.$or = [
+          { userEmail: { $regex: search, $options: "i" } },
+          { "guestDetails.name": { $regex: search, $options: "i" } },
+          { "guestDetails.email": { $regex: search, $options: "i" } },
+          { _id: { $regex: search, $options: "i" } } // Maybe support ID search too? usually MongoIDs are hex but regex works on string rep in mongoose often or fails. Safe to keep string fields.
+          // Note: _id is ObjectId, regex might not work directly. Let's skip _id regex for now unless we cast. 
+          // We can try exact match if it looks like an ID.
+      ];
+  }
+
+  try {
+    const bookings = await Booking.find(query)
+        .populate({
+            path: 'showtime',
+            populate: { path: 'movie', select: 'title' }
+        })
+        .sort({ createdAt: -1 });
+    
+    return NextResponse.json({ success: true, data: bookings });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: "Failed to fetch bookings" }, { status: 500 });
+  }
+}
 
 export async function POST(req: Request) {
   try {

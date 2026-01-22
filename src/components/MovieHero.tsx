@@ -23,10 +23,10 @@ export default function MovieHero({ movie }: MovieHeroProps) {
           className="h-full w-full object-cover opacity-70"
         />
 
-        <div className="absolute bottom-0 left-0 z-20 container mx-auto px-4 py-12 flex items-end">
+        <div className="absolute inset-0 z-20 container mx-auto px-4 flex items-center justify-start">
           <img
             src={movie.posterUrl}
-            className="w-56 rounded-xl shadow-2xl mr-8 hidden lg:block border border-gray-700/50"
+            className="w-56 rounded-xl shadow-2xl mr-8 hidden lg:block border border-gray-700/50 self-center"
           />
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg">
