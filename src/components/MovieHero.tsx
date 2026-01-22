@@ -39,9 +39,9 @@ export default function MovieHero({ movie }: MovieHeroProps) {
               <span>{movie.runtime} min</span>
               <span>{movie.genres.join(", ")}</span>
             </div>
-            <p className="text-gray-200 text-lg leading-relaxed line-clamp-3 md:line-clamp-none mb-8 drop-shadow-md">
+            {/* <p className="text-gray-200 text-lg leading-relaxed line-clamp-3 md:line-clamp-none mb-8 drop-shadow-md">
               {movie.description}
-            </p>
+            </p> */}
 
             <button
               onClick={() => setIsTrailerOpen(true)}

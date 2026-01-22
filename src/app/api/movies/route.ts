@@ -8,9 +8,14 @@ export async function GET(req: NextRequest) {
 
   try {
     const search = req.nextUrl.searchParams.get("search");
-    const query = search
+    const status = req.nextUrl.searchParams.get("status");
+    const query: any = search
       ? { title: { $regex: search, $options: "i" } }
       : {};
+    
+    if (status) {
+        query.status = status;
+    }
 
     const movies = await Movie.find(query).sort({ createdAt: -1 });
     return NextResponse.json({ success: true, data: movies });

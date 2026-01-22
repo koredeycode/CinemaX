@@ -10,6 +10,7 @@ export interface IMovie extends Document {
   runtime: number; // in minutes
   rating: string;
   genres: string[];
+  status: "now_showing" | "coming_soon" | "not_showing";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +26,11 @@ const MovieSchema: Schema = new Schema(
     runtime: { type: Number, required: true },
     rating: { type: String, required: true },
     genres: { type: [String], required: true },
+    status: {
+      type: String,
+      enum: ["now_showing", "coming_soon", "not_showing"],
+      default: "coming_soon",
+    },
   },
   { timestamps: true }
 );

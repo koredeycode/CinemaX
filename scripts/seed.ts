@@ -18,29 +18,32 @@ const sampleMovies = [
     trailerUrl: "https://www.youtube.com/embed/Way9Dexny3w",
     rating: "PG-13",
     runtime: 166,
-    genres: ["Sci-Fi", "Adventure", "Drama"]
+    genres: ["Sci-Fi", "Adventure", "Drama"],
+    status: "now_showing"
   },
   {
     title: "Oppenheimer",
     slug: "oppenheimer",
     description: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.",
     posterUrl: "https://image.tmdb.org/t/p/original/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
-    backdropUrl: "https://image.tmdb.org/t/p/original/ycnO0cjsAROSGJKuMODgRtWsHQw.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/7CENyUim29IEsaJhUxIGymCRvPu.jpg",
     trailerUrl: "https://www.youtube.com/embed/uYPbbksJxIg",
     rating: "R",
     runtime: 180,
-    genres: ["Biography", "Drama", "History"]
+    genres: ["Biography", "Drama", "History"],
+    status: "now_showing"
   },
   {
     title: "Barbie",
     slug: "barbie",
     description: "Barbie and Ken are having the time of their lives in the colorful and seemingly perfect world of Barbie Land. However, when they get a chance to go to the real world, they soon discover the joys and perils of living among humans.",
     posterUrl: "https://image.tmdb.org/t/p/original/vJ4r8imQ9piseO9ufCwsopBBWnZ.jpg",
-    backdropUrl: "https://image.tmdb.org/t/p/original/3N5QNUqS76GFYNoEayfkkJyAyTN.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/ctMserH8g2SeOAnCw5gFjdQF8mo.jpg",
     trailerUrl: "https://www.youtube.com/embed/pBk4NYhWNMM",
     rating: "PG-13",
     runtime: 114,
-    genres: ["Adventure", "Comedy", "Fantasy"]
+    genres: ["Adventure", "Comedy", "Fantasy"],
+    status: "now_showing"
   },
   {
     title: "The Dark Knight",
@@ -51,7 +54,8 @@ const sampleMovies = [
     trailerUrl: "https://www.youtube.com/embed/EXeTwQWrcwY",
     rating: "PG-13",
     runtime: 152,
-    genres: ["Action", "Crime", "Drama"]
+    genres: ["Action", "Crime", "Drama"],
+    status: "coming_soon"
   },
   {
     title: "Inception",
@@ -62,7 +66,8 @@ const sampleMovies = [
     trailerUrl: "https://www.youtube.com/embed/YoHD9XEInc0",
     rating: "PG-13",
     runtime: 148,
-    genres: ["Action", "Adventure", "Sci-Fi"]
+    genres: ["Action", "Adventure", "Sci-Fi"],
+    status: "now_showing"
   },
   {
     title: "Spider-Man: Across the Spider-Verse",
@@ -73,7 +78,8 @@ const sampleMovies = [
     trailerUrl: "https://www.youtube.com/embed/cqGjhVJWtEg",
     rating: "PG",
     runtime: 140,
-    genres: ["Animation", "Action", "Adventure"]
+    genres: ["Animation", "Action", "Adventure"],
+    status: "coming_soon"
   },
   {
     title: "Interstellar",
@@ -84,7 +90,8 @@ const sampleMovies = [
     trailerUrl: "https://www.youtube.com/embed/zSWdZVtXT7E",
     rating: "PG-13",
     runtime: 169,
-    genres: ["Adventure", "Drama", "Sci-Fi"]
+    genres: ["Adventure", "Drama", "Sci-Fi"],
+    status: "not_showing"
   },
   {
     title: "Pulp Fiction",
@@ -95,7 +102,8 @@ const sampleMovies = [
     trailerUrl: "https://www.youtube.com/embed/s7EdQ4FqbhY",
     rating: "R",
     runtime: 154,
-    genres: ["Crime", "Drama"]
+    genres: ["Crime", "Drama"],
+    status: "not_showing"
   },
   {
     title: "The Matrix",
@@ -106,7 +114,8 @@ const sampleMovies = [
     trailerUrl: "https://www.youtube.com/embed/vKQi3bBA1y8",
     rating: "R",
     runtime: 136,
-    genres: ["Action", "Sci-Fi"]
+    genres: ["Action", "Sci-Fi"],
+    status: "coming_soon"
   },
   {
     title: "Avatar: The Way of Water",
@@ -117,7 +126,32 @@ const sampleMovies = [
     trailerUrl: "https://www.youtube.com/embed/d9MyqFCD6sQ",
     rating: "PG-13",
     runtime: 192,
-    genres: ["Sci-Fi", "Adventure", "Action"]
+    genres: ["Sci-Fi", "Adventure", "Action"],
+    status: "now_showing"
+  },
+  {
+    title: "Deadpool & Wolverine",
+    slug: "deadpool-and-wolverine",
+    description: "A listless Wade Wilson toils away in civilian life with his days as the morally flexible mercenary, Deadpool, behind him. But when his homeworld faces an existential threat, Wade must reluctantly suit-up again with an even more reluctant Wolverine.",
+    posterUrl: "https://image.tmdb.org/t/p/original/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/yDHYTfA3R0jFYba16jBB1ef8oIt.jpg",
+    trailerUrl: "https://www.youtube.com/embed/73_1biulkYk",
+    rating: "R",
+    runtime: 127,
+    genres: ["Action", "Comedy", "Sci-Fi"],
+    status: "coming_soon"
+  },
+  {
+    title: "Kingdom of the Planet of the Apes",
+    slug: "kingdom-of-the-planet-of-the-apes",
+    description: "Several generations in the future following Caesar's reign, in which apes are the dominant species living harmoniously and humans have been reduced to living in the shadows. As a new tyrannical ape leader builds his empire, one young ape undertakes a harrowing journey that will cause him to question all that he has known about the past and to make choices that will define a future for apes and humans alike.",
+    posterUrl: "https://image.tmdb.org/t/p/original/gKkl37BQuKTanygYQG1pyYgLVgf.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/iHYh4cdO8ylA3W0dUxTDVdyJ5G9.jpg",
+    trailerUrl: "https://www.youtube.com/embed/Kdr5oedn7q8",
+    rating: "PG-13",
+    runtime: 145,
+    genres: ["Sci-Fi", "Adventure", "Action"],
+    status: "now_showing"
   }
 ];
 

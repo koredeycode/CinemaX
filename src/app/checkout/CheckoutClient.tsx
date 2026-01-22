@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import { useAuthStore } from '@/store/authStore';
 import { PaystackButton } from "react-paystack";
 import { toast } from "sonner";
@@ -43,6 +44,8 @@ export default function CheckoutClient() {
   // Debug logging
   console.log("Paystack Public Key:", process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ? "Present" : "Missing");
 
+  const [itemToRemove, setItemToRemove] = useState<number | null>(null);
+
   useEffect(() => {
     setMounted(true);
     
@@ -71,9 +74,16 @@ export default function CheckoutClient() {
     updateGuestDetails(nextForm); 
   };
   
-  const handleRemoveItem = (index: number) => {
-      removeFromCart(index);
-      toast.info("Item removed from cart");
+  const confirmRemoveItem = (index: number) => {
+      setItemToRemove(index);
+  };
+
+  const executeRemoveItem = () => {
+      if (itemToRemove !== null) {
+          removeFromCart(itemToRemove);
+          toast.info("Item removed from cart");
+          setItemToRemove(null);
+      }
   };
 
   const handleEditItem = (index: number, path: 'seats' | 'food') => {
@@ -203,7 +213,7 @@ export default function CheckoutClient() {
                 {cart.map((item, index) => (
                     <div key={index} className="bg-gray-900 rounded-xl p-6 border border-gray-800 relative">
                         <button 
-                            onClick={() => handleRemoveItem(index)}
+                            onClick={() => confirmRemoveItem(index)}
                             className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-colors"
                             title="Remove item"
                         >
@@ -373,6 +383,16 @@ export default function CheckoutClient() {
             </div>
           </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={itemToRemove !== null}
+        onClose={() => setItemToRemove(null)}
+        onConfirm={executeRemoveItem}
+        title="Remove Item?"
+        message="Are you sure you want to remove this item from your cart? This action cannot be undone."
+        confirmText="Remove"
+        isDestructive
+      />
     </div>
   );
 }
