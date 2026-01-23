@@ -156,12 +156,22 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
       }
   }, [movie, date, time]);
 
-  // Sync with Global Session State
   useEffect(() => {
+    console.log("SeatMap - Sync Effect", { 
+        currentId: currentSession?.movieId, 
+        currentDate: currentSession?.date, 
+        currentTime: currentSession?.time,
+        propId: movie._id,
+        propDate: date,
+        propTime: time
+    });
+
     // Check if session matches
-    if (currentSession?.movieId === movie._id.toString() && currentSession?.date === date && currentSession?.time === time) {
+    if (String(currentSession?.movieId) === String(movie._id) && currentSession?.date === date && currentSession?.time === time) {
+        console.log("SeatMap - Session matched, setting seats:", currentSession.seats);
         setSelectedSeats(currentSession.seats);
     } else {
+        console.log("SeatMap - Session mismatch, starting new...");
         // Start new session
         startSession(
             movie,
@@ -170,7 +180,7 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
             movie.price || 4500 // Default price fallback
         );
     }
-  }, [movie._id, date, time]); // Check dependencies carefully
+  }, [movie._id, date, time, currentSession]); // Check dependencies carefully
 
   const handleSeatClick = (row: number, col: number) => {
     const seatLabel = `${String.fromCharCode(65 + row)}${col + 1}`;
