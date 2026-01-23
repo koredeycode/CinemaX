@@ -1,70 +1,39 @@
 "use client";
 
+import Sidebar from "@/components/Sidebar";
 import { useAuthStore } from "@/store/authStore";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { logout } = useAuthStore();
-  const router = useRouter();
+  const { user } = useAuthStore();
 
-  const handleLogout = () => {
-      logout();
-      router.push("/");
-  };
+  const adminNavItems = [
+    { name: "Dashboard", href: "/admin", icon: "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" },
+    { name: "Movies", href: "/admin/movies", icon: "M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375M20.625 4.5H3.375a1.125 1.125 0 01-1.125-1.125m17.25 0H3.375m18.375 0v1.5c0 .621-.504 1.125-1.125 1.125m0-2.625c.621 0 1.125.504 1.125 1.125m-1.125-1.125v1.5c0 .621.504 1.125 1.125 1.125m-1.125 0H6m12.75 0h-1.5A1.125 1.125 0 0116.125 4.5H18.375M6 4.5v1.5c0 .621-.504 1.125-1.125 1.125H3.375" },
+    { name: "Bookings", href: "/admin/bookings", icon: "M16.5 6a3 3 0 00-3-3H6a3 3 0 00-3 3v7.5a3 3 0 003 3v-7.5a3 3 0 013-3h7.5V6z M18 10.5a3 3 0 00-3-3H9a3 3 0 00-3 3v7.5a3 3 0 003 3h6a3 3 0 003-3v-7.5z" },
+    { name: "Verify Ticket", href: "/admin/verify", icon: "M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.088v5.61c0 1.18.96 2.175 2.175 2.175h7.5c1.18 0 2.175-.995 2.175-2.175V6.19c0-1.115-.845-2.078-1.976-2.171a41.32 41.32 0 00-1.125-.08M10.5 8.25h3.75a.75.75 0 00.75-.75v-1.5a.75.75 0 00-.75-.75H10.5a.75.75 0 00-.75.75v1.5a.75.75 0 00.75.75z" },
+    { name: "Complaints", href: "/admin/complaints", icon: "M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" },
+    { name: "Back to Site", href: "/", icon: "M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" },
+  ];
 
   return (
-    <div className="flex h-screen bg-black">
-      {/* Sidebar */}
-      <aside className="w-64 h-auto bg-gray-900 border-r border-gray-800 hidden md:flex flex-col">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-primary">CinemaX Admin</h2>
-        </div>
-        <nav className="mt-6 px-4 space-y-2 flex-1">
-          <Link href="/admin" className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
-            Dashboard
-          </Link>
-          <Link href="/admin/movies" className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
-            Movies
-          </Link>
-
-          <Link href="/admin/bookings" className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
-            Bookings
-          </Link>
-          <Link href="/admin/verify" className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
-            Verify Ticket
-          </Link>
-          <Link href="/admin/complaints" className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
-            Complaints
-          </Link>
-          <div className="pt-8 mt-8 border-t border-gray-800">
-             <Link href="/" className="block px-4 py-2 rounded-lg text-gray-500 hover:bg-gray-800 hover:text-white transition-colors">
-                Back to Site
-             </Link>
-          </div>
-        </nav>
-
-        <div className="p-4 border-t border-gray-800">
-             <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors"
-             >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                </svg>
-                Logout
-             </button>
-          </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-8 overflow-y-auto">
-        {children}
-      </main>
+    <div className="min-h-screen bg-black">
+      <div className="flex">
+        <Sidebar 
+          title="CinemaX Admin" 
+          items={adminNavItems} 
+        />
+        
+        {/* Main Content */}
+        <main className="flex-1 md:pl-64">
+           <div className="p-8">
+               {children}
+           </div>
+        </main>
+      </div>
     </div>
   );
 }

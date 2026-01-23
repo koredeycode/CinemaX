@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
         const _ = Movie;
 
         const booking = await Booking.findById(bookingId)
-            .populate({ path: 'movie', select: 'title', strictPopulate: false })
+            .populate({ path: 'movieId', select: 'title', strictPopulate: false })
             .lean();
 
         if (!booking) {

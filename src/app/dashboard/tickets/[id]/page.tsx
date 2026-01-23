@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 interface Booking {
   _id: string;
-  movie: {
+  movieId: {
      title: string;
      posterUrl: string;
   };

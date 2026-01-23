@@ -3,7 +3,9 @@ import dbConnect from "@/lib/db";
 import logger from "@/lib/logger";
 import Booking from "@/models/Booking";
 import Movie, { IMovie } from "@/models/Movie";
+import fs from "fs";
 import { NextRequest, NextResponse } from "next/server";
+import path from "path";
 import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import QRCode from "qrcode";
 
@@ -37,12 +39,12 @@ export async function GET(
 
         // Manual population for robustness
         let movie: IMovie | null = null;
-        if (booking.movie) {
-            movie = await Movie.findById(booking.movie).lean() as unknown as IMovie;
+        if (booking.movieId) {
+            movie = await Movie.findById(booking.movieId).lean() as unknown as IMovie;
         }
         
         if (!movie) {
-             logger.error(`Movie not found for booking ${bookingId}. Movie ID: ${booking.movie}`);
+             logger.error(`Movie not found for booking ${bookingId}. Movie ID: ${booking.movieId}`);
              return NextResponse.json({ error: "Movie not found" }, { status: 404 });
         }
         
@@ -64,11 +66,17 @@ export async function GET(
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-        // 2. Generate QR
+        // 2. Load and Embed Logo
+        const logoPath = path.join(process.cwd(), 'public', 'icon.png');
+        const logoImageBytes = await fs.promises.readFile(logoPath);
+        const logoImage = await pdfDoc.embedPng(logoImageBytes);
+        const logoDims = logoImage.scale(0.5); // Adjust scale as needed
+
+        // 3. Generate QR
         const qrCodeDataUrl = await QRCode.toDataURL(bookingId, { margin: 1 });
         const qrImage = await pdfDoc.embedPng(qrCodeDataUrl);
         
-        // 3. Draw Design
+        // 4. Draw Design
         
         // Background
         page.drawRectangle({
@@ -83,10 +91,14 @@ export async function GET(
         });
         
         // Rotated "CINEMA TICKET" text on the red strip
+        // Rotated 90 deg CCW: Text flows UP. Baseline is on the Right, Ascenders point Left.
+        // Strip width is 40. Center is 20.
+        // Font size 22. Cap height ~15-16. 
+        // We need baseline at x ~ 28 to leave room for ascenders on the left (towards x=0).
         page.drawText('CINEMA TICKET', {
-            x: 15,
+            x: 28, 
             y: 30, // Start from bottom
-            size: 24,
+            size: 22,
             font: boldFont,
             color: rgb(1, 1, 1),
             rotate: degrees(90),
@@ -108,11 +120,27 @@ export async function GET(
         // --- MAIN SECTION (Left of separator) ---
         const mainX = 60;
         
+        // Logo & App Name Header
+        page.drawImage(logoImage, {
+            x: mainX,
+            y: height - 50,
+            width: 30,
+            height: 30, 
+        });
+
+        page.drawText('CinemaX', {
+            x: mainX + 40,
+            y: height - 42,
+            size: 20,
+            font: boldFont,
+            color: cinemaRed,
+        });
+
         // Movie Title
         page.drawText(movie.title.toUpperCase(), { 
             x: mainX, 
-            y: height - 60, 
-            size: 28, 
+            y: height - 90, 
+            size: 24, 
             font: boldFont, 
             color: darkGray,
             maxWidth: 340,

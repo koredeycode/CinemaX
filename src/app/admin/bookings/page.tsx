@@ -103,7 +103,7 @@ function AdminBookingsContent() {
                                         <div className="text-xs">{booking.guestDetails?.email || booking.userEmail}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {booking.movie?.title || "Unknown"}
+                                        {booking.movieId?.title || "Unknown"}
                                         <div className="text-xs text-gray-500">
                                            {(() => {
                                                 if (!booking.date || !booking.time) return "N/A";

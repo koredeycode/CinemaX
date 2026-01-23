@@ -2,9 +2,50 @@
 
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+interface Booking {
+    _id: string;
+    date: string;
+    time: string;
+    movieId: {
+        _id: string;
+        title: string;
+        posterUrl: string;
+        slug: string;
+    };
+    seats: string[];
+}
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
+  const [upcomingBooking, setUpcomingBooking] = useState<Booking | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUpcomingBooking = async () => {
+        try {
+            const res = await fetch("/api/user/bookings");
+            const data = await res.json();
+            if (data.success && data.bookings.length > 0) {
+                // Determine upcoming logic: find closest future booking? 
+                // Currently API returns all sorted by createdAt desc.
+                // Simple logic: grab the latest booking as "Upcoming".
+                // Ideally we filter by date >= today, but date format might vary.
+                // Let's just show the most recent one for now.
+                setUpcomingBooking(data.bookings[0]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch bookings:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (user) {
+        fetchUpcomingBooking();
+    }
+  }, [user]);
 
   return (
     <div>
@@ -30,12 +71,48 @@ export default function DashboardPage() {
              </div>
           </div>
           
-           <div className="bg-gradient-to-br from-primary/20 to-gray-900 rounded-2xl p-6 border border-primary/20">
-               <h3 className="text-primary text-sm font-bold mb-2 tracking-wider">UPCOMING</h3>
-               <p className="text-gray-300 mb-6">You have no upcoming movies. Why not change that?</p>
-               <Link href="/" className="inline-block bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-red-700 transition-colors">
-                  Browse Movies
-               </Link>
+           <div className="bg-gradient-to-br from-primary/20 to-gray-900 rounded-2xl p-6 border border-primary/20 relative overflow-hidden">
+               <h3 className="text-primary text-sm font-bold mb-2 tracking-wider">UPCOMING MOVIE</h3>
+               
+               {loading ? (
+                   <div className="animate-pulse flex gap-4 mt-4">
+                       <div className="w-24 h-36 bg-gray-700 rounded-lg"></div>
+                       <div className="flex-1 space-y-2 py-2">
+                           <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+                           <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+                       </div>
+                   </div>
+               ) : upcomingBooking ? (
+                   <div className="flex gap-4 mt-4 relative z-10">
+                       <img 
+                            src={upcomingBooking.movieId.posterUrl} 
+                            alt={upcomingBooking.movieId.title}
+                            className="w-24 h-36 object-cover rounded-lg shadow-lg"
+                       />
+                       <div>
+                           <h4 className="text-xl font-bold text-white mb-1">{upcomingBooking.movieId.title}</h4>
+                           <p className="text-gray-300 text-sm mb-2">
+                               {upcomingBooking.date} • {upcomingBooking.time}
+                           </p>
+                           <p className="text-gray-400 text-xs mb-3">
+                               {upcomingBooking.seats.length} Tickets • {upcomingBooking.seats.join(", ")}
+                           </p>
+                           <Link 
+                                href="/dashboard/bookings"
+                                className="inline-block bg-primary text-white text-sm px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors"
+                           >
+                                View Ticket
+                           </Link>
+                       </div>
+                   </div>
+               ) : (
+                   <div>
+                        <p className="text-gray-300 mb-6">You have no upcoming movies. Why not change that?</p>
+                        <Link href="/" className="inline-block bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-red-700 transition-colors">
+                            Browse Movies
+                        </Link>
+                   </div>
+               )}
            </div>
        </div>
     </div>

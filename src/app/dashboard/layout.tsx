@@ -1,7 +1,7 @@
 "use client";
 
+import Sidebar from "@/components/Sidebar";
 import { useAuthStore } from "@/store/authStore";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -24,6 +24,7 @@ export default function DashboardLayout({
 
   if (!mounted || !user) return null; // Or a loading spinner
 
+  /* Sidebar items */
   const navItems = [
     { name: "Overview", href: "/dashboard", icon: "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" },
     { name: "My Bookings", href: "/dashboard/bookings", icon: "M16.5 6a3 3 0 00-3-3H6a3 3 0 00-3 3v7.5a3 3 0 003 3v-7.5a3 3 0 013-3h7.5V6z M18 10.5a3 3 0 00-3-3H9a3 3 0 00-3 3v7.5a3 3 0 003 3h6a3 3 0 003-3v-7.5z" },
@@ -32,55 +33,16 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-64 bg-gray-900 border-r border-gray-800 hidden md:flex flex-col">
-          <div className="p-6 border-b border-gray-800">
-             <h2 className="text-xl font-bold text-white">My Dashboard</h2>
-             <p className="text-sm text-gray-500 mt-1">{user.name}</p>
-          </div>
-          
-          <nav className="flex-1 p-4 space-y-2">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                    isActive 
-                      ? "bg-primary text-white font-medium" 
-                      : "text-gray-400 hover:bg-gray-800 hover:text-white"
-                  }`}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-                  </svg>
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="p-4 border-t border-gray-800">
-             <button
-                onClick={() => {
-                   logout();
-                   router.push("/");
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors"
-             >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                </svg>
-                Logout
-             </button>
-          </div>
-        </aside>
-
-        {/* content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
-            <div className="max-w-4xl mx-auto">
+      <div className="flex">
+        <Sidebar 
+          title="My Dashboard" 
+          subtitle={user.name} 
+          items={navItems} 
+        />
+        
+        {/* Main content - pushed right by 64 (16rem/256px) */}
+        <main className="flex-1 md:pl-64">
+            <div className="p-4 md:p-8 max-w-6xl mx-auto">
                 {children}
             </div>
         </main>

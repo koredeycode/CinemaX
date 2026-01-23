@@ -31,7 +31,7 @@ export async function GET(req: Request) {
     // Use strictPopulate: false as a safeguard against schema mismatches, and lean objects.
     const bookings = await Booking.find({ userEmail: user.email })
       .sort({ createdAt: -1 })  
-      .populate({ path: 'movie', select: 'title posterUrl', strictPopulate: false })
+      .populate({ path: 'movieId', select: 'title posterUrl', strictPopulate: false })
       .lean();
     
     return NextResponse.json({ success: true, bookings });

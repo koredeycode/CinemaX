@@ -14,10 +14,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing required parameters" }, { status: 400 });
     }
 
-    // Find all bookings for this movie slot that are CONFIRMED or PENDING
     // Pending bookings hold the seat for a short while (clean up job needed in real app)
     const bookings = await Booking.find({
-      movie: movieId,
+      movieId: movieId,
       date,
       time,
       status: { $in: ["confirmed", "pending"] }

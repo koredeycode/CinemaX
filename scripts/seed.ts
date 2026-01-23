@@ -245,7 +245,7 @@ async function seed() {
         await Booking.create({
             user: user._id,
             userEmail: user.email,
-            movie: movie._id,
+            movieId: movie._id,
             date: schedule.date,
             time: schedule.times[1], // 13:00
             seats: ["D4", "D5"],
@@ -262,7 +262,7 @@ async function seed() {
         await Booking.create({
             user: user._id,
             userEmail: user.email,
-            movie: movies[1]._id,
+            movieId: movies[1]._id,
              date: schedule.date,
             time: schedule.times[3], // 19:00
             seats: ["F10"],

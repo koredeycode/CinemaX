@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 
 interface Booking {
   _id: string;
-  movie: {
+  movieId: {
      title: string;
      posterUrl: string;
   };
@@ -66,10 +66,10 @@ export default function MyBookingsPage() {
              {bookings.map((booking) => (
                  <div key={booking._id} className="bg-gray-900 rounded-xl p-4 border border-gray-800 flex gap-4 items-center">
                     <div className="w-16 h-24 relative bg-gray-800 rounded-lg overflow-hidden shrink-0">
-                         {booking.movie?.posterUrl && (
+                         {booking.movieId?.posterUrl && (
                              <Image 
-                                src={booking.movie.posterUrl} 
-                                alt={booking.movie.title}
+                                src={booking.movieId.posterUrl} 
+                                alt={booking.movieId.title}
                                 fill
                                 className="object-cover"
                              />
@@ -79,7 +79,7 @@ export default function MyBookingsPage() {
                     <div className="flex-1">
                         <div className="flex justify-between items-start">
                             <div>
-                                <h3 className="font-bold text-white text-lg">{booking.movie?.title || "Unknown Movie"}</h3>
+                                <h3 className="font-bold text-white text-lg">{booking.movieId?.title || "Unknown Movie"}</h3>
                                 <p className="text-gray-400 text-sm">
                                     {(() => {
                                         if (!booking.date || !booking.time) return "N/A";

@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
      const _ = Movie;
 
     const bookings = await Booking.find(query)
-        .populate({ path: 'movie', select: 'title posterUrl', strictPopulate: false })
+        .populate({ path: 'movieId', select: 'title posterUrl', strictPopulate: false })
         .sort({ createdAt: -1 })
         .lean();
     
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
             user: item.user || null, // If user is logged in
             userEmail: guestDetails.email, // Save email for association
             guestDetails: guestDetails || null,
-            movie: item.movieId,
+            movieId: item.movieId,
             date: item.date,
             time: item.time,
             seats: item.seats,
