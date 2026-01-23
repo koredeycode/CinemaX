@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { validateEnv } from "./src/lib/validateEnv";
+
+validateEnv();
 
 const nextConfig: NextConfig = {
   images: {
