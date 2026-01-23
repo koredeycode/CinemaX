@@ -14,6 +14,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -33,14 +34,31 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Mobile Header with Hamburger */}
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900 sticky top-16 z-30">
+        <div className="flex items-center gap-2">
+           <h1 className="text-xl font-bold text-white">Dashboard</h1>
+        </div>
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="text-gray-400 hover:text-white"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+      </div>
+
       <div className="flex">
         <Sidebar 
           title="My Dashboard" 
           subtitle={user.name} 
           items={navItems} 
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
         />
         
-        {/* Main content - pushed right by 64 (16rem/256px) */}
+        {/* Main content - pushed right by 64 (16rem/256px) on Desktop */}
         <main className="flex-1 md:pl-64">
             <div className="p-4 md:p-8 max-w-6xl mx-auto">
                 {children}
