@@ -37,6 +37,11 @@ export async function GET(
             }
         }
 
+        // Check if booking is confirmed
+        if (booking.status !== "confirmed" && booking.status !== "CONFIRMED") {
+            return NextResponse.json({ error: "Ticket not available: Booking is not confirmed" }, { status: 403 });
+        }
+
         // Manual population for robustness
         let movie: IMovie | null = null;
         if (booking.movieId) {

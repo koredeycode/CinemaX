@@ -51,6 +51,18 @@ export default function TicketPage() {
   
   if (!booking) return <div className="text-white p-8">Ticket not found</div>;
 
+  if (booking.status !== 'confirmed') {
+      return (
+          <div className="max-w-4xl mx-auto p-4 text-center py-20">
+              <div className="bg-yellow-900/20 text-yellow-500 p-6 rounded-xl border border-yellow-500/30 inline-block">
+                  <h2 className="text-xl font-bold mb-2">Ticket Not Available</h2>
+                  <p>This booking is currently <strong>{booking.status}</strong>.</p>
+                  <p className="text-sm mt-2 opacity-80">Tickets are only generated for confirmed bookings.</p>
+              </div>
+          </div>
+      );
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-4">
        <div className="mb-8 text-center">

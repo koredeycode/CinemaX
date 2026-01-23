@@ -105,12 +105,18 @@ export default function MyBookingsPage() {
                         
                         <div className="mt-2 flex justify-between items-end">
                             <p className="text-sm text-gray-500">{booking.seats.length} Tickets • {booking.seats.join(", ")}</p>
-                            <Link 
-                                href={`/dashboard/tickets/${booking._id}`}
-                                className="text-sm bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-                            >
-                                View Ticket
-                            </Link>
+                            {booking.status === 'confirmed' ? (
+                                <Link 
+                                    href={`/dashboard/tickets/${booking._id}`}
+                                    className="text-sm bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                                >
+                                    View Ticket
+                                </Link>
+                            ) : (
+                                <span className="text-sm text-gray-500 italic">
+                                    Ticket unavailable
+                                </span>
+                            )}
                         </div>
                     </div>
                  </div>

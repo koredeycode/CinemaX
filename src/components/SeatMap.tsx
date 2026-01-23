@@ -4,8 +4,9 @@ import { IMovie } from "@/models/Movie";
 import { useCartStore } from "@/store/cartStore";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-// import io, { Socket } from "socket.io-client"; // Socket removed for refactor simplicity, can re-add later if needed
+import { useEffect, useRef, useState } from "react";
+import io, { Socket } from "socket.io-client";
+import { toast } from "sonner";
 
 interface SeatMapProps {
   movie: IMovie;
@@ -14,16 +15,21 @@ interface SeatMapProps {
   userId?: string; 
 }
 
-// let socket: Socket;
-
 export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
   const router = useRouter();
   const { currentSession, startSession, updateSeats } = useCartStore();
   
   const [bookedSeats, setBookedSeats] = useState<string[]>([]);
-  // const [lockedSeats, setLockedSeats] = useState<{ [key: string]: string }>({});
+  const [lockedSeats, setLockedSeats] = useState<{ [key: string]: string }>({}); // seat -> userId
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  
+  // Timer State
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const socketRef = useRef<Socket | null>(null);
+  const showtimeId = `${movie._id}:${date}:${time}`;
 
   // Hardcoded for now, or could come from Movie model if dynamic per movie
   const rows = 10;
@@ -41,6 +47,100 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
         setGuestId(stored);
     }
   }, [userId]);
+
+  // WebSocket Connection
+  useEffect(() => {
+    // Initialize Socket
+    socketRef.current = io({
+        path: "/api/socket/io",
+        addTrailingSlash: false,
+    });
+
+    const socket = socketRef.current;
+
+    socket.on("connect", () => {
+        console.log("Connected to socket server");
+        socket.emit("join-showtime", showtimeId);
+    });
+
+    socket.on("seat-locked", ({ seatLabel, userId: lockerId }: { seatLabel: string, userId: string }) => {
+        console.log(`[SeatMap] Seat locked event: ${seatLabel} by ${lockerId}`);
+        setLockedSeats(prev => ({ ...prev, [seatLabel]: lockerId }));
+    });
+
+    socket.on("seat-released", ({ seatLabel }: { seatLabel: string }) => {
+        console.log(`[SeatMap] Seat released event: ${seatLabel}`);
+        setLockedSeats(prev => {
+            const newLocked = { ...prev };
+            delete newLocked[seatLabel];
+            return newLocked;
+        });
+    });
+
+    socket.on("seat-error", ({ message }: { message: string }) => {
+        toast.error(message);
+        // Revert selection if needed (though we check before selecting)
+    });
+
+    return () => {
+        if (socket) socket.disconnect();
+    };
+  }, [showtimeId]);
+
+
+  // Timer Logic
+  useEffect(() => {
+      if (selectedSeats.length > 0 && timeLeft === null) {
+          // Start timer if not running
+          setTimeLeft(300); // 5 minutes
+      } else if (selectedSeats.length === 0) {
+          // Stop timer if no seats
+          setTimeLeft(null);
+          if (timerRef.current) clearInterval(timerRef.current);
+      }
+  }, [selectedSeats.length, timeLeft]);
+
+  useEffect(() => {
+      if (timeLeft !== null && timeLeft > 0) {
+          timerRef.current = setInterval(() => {
+              setTimeLeft(prev => {
+                  if (prev && prev > 1) return prev - 1;
+                  return 0;
+              });
+          }, 1000);
+      } else if (timeLeft === 0) {
+          // Time expired!
+          if (timerRef.current) clearInterval(timerRef.current);
+          handleExpiry();
+      }
+
+      return () => {
+          if (timerRef.current) clearInterval(timerRef.current);
+      };
+  }, [timeLeft]);
+
+  const handleExpiry = () => {
+      toast.warning("Seat reservation expired! Please try again.");
+      
+      // Release all selected seats
+      selectedSeats.forEach(seat => {
+          socketRef.current?.emit("release-seat", {
+              showtimeId,
+              seatLabel: seat
+          });
+      });
+      
+      setSelectedSeats([]);
+      updateSeats([]);
+      setTimeLeft(null);
+  };
+
+  const formatTime = (seconds: number) => {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
 
   // Fetch Availability
   useEffect(() => {
@@ -74,15 +174,37 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
 
   const handleSeatClick = (row: number, col: number) => {
     const seatLabel = `${String.fromCharCode(65 + row)}${col + 1}`;
+    const myId = userId || guestId;
     
+    // Check if booked or locked by someone else
     if (bookedSeats.includes(seatLabel)) return;
+    if (lockedSeats[seatLabel] && lockedSeats[seatLabel] !== myId) {
+        toast.error("This seat is currently being booked by someone else");
+        return;
+    }
 
     // Toggle selection
     let newSelection = [...selectedSeats];
     if (selectedSeats.includes(seatLabel)) {
+        // Deselecting
         newSelection = newSelection.filter(s => s !== seatLabel);
+        socketRef.current?.emit("release-seat", {
+            showtimeId,
+            seatLabel
+        });
     } else {
+        // Selecting
+        if (selectedSeats.length >= 5) {
+            toast.error("You can only select up to 5 seats");
+            return;
+        }
+
         newSelection.push(seatLabel);
+        socketRef.current?.emit("select-seat", {
+            showtimeId,
+            seatLabel,
+            userId: myId
+        });
     }
     
     setSelectedSeats(newSelection);
@@ -101,6 +223,17 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
   return (
     <div className="w-full max-w-5xl mx-auto md:p-8 p-4 rounded-xl min-h-[600px] flex flex-col items-center">
       
+      {/* Timer Bar */}
+      {timeLeft !== null && (
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gray-900/90 border border-yellow-500/30 backdrop-blur-md text-white px-6 py-2 rounded-full shadow-xl flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-300">
+               <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+               <span className="text-sm font-medium text-gray-300">Seats reserved for:</span>
+               <span className={clsx("font-mono font-bold text-lg tab-num", timeLeft < 60 ? "text-red-500" : "text-yellow-400")}>
+                   {formatTime(timeLeft)}
+               </span>
+          </div>
+      )}
+
       {error && (
         <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-center text-sm w-full max-w-md">
             {error}
@@ -120,8 +253,8 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
       </div>
 
       {/* Main Seat Grid Container - Horizontal Scroll for Mobile */}
-      <div className="w-full overflow-x-auto pb-12 flex justify-center">
-        <div className="flex gap-4 items-start min-w-max px-4">
+      <div className="w-full overflow-x-auto pb-12 disable-scrollbars">
+        <div className="flex gap-4 items-start min-w-max px-4 mx-auto w-fit">
             {/* Row Labels (Left Side) */}
             <div className="flex flex-col gap-3 pt-1 sticky left-0 z-10 bg-[#111] pr-2">
                 {Array.from({ length: rows }).map((_, r) => {
@@ -157,6 +290,10 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
                                 const seatLabel = `${String.fromCharCode(65 + r)}${c + 1}`;
                                 const isBooked = bookedSeats.includes(seatLabel);
                                 const isSelected = selectedSeats.includes(seatLabel);
+                                
+                                const myId = userId || guestId;
+                                const lockedByOther = lockedSeats[seatLabel] && lockedSeats[seatLabel] !== myId;
+                                
                                 const isMiddleGap = c === halfCols - 1;
 
                                 let statusColor = "bg-[#3A3A45] hover:bg-[#4A4A55] text-gray-300"; // Available
@@ -165,6 +302,9 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
                                 if (isBooked) {
                                     statusColor = "bg-[#5c0000] text-red-200/50 cursor-not-allowed";
                                     bottomBorder = "border-b-4 border-[#3a0000]";
+                                } else if (lockedByOther) {
+                                     statusColor = "bg-yellow-900/50 text-yellow-500/50 cursor-not-allowed";
+                                     bottomBorder = "border-b-4 border-yellow-900";
                                 } else if (isSelected) {
                                     statusColor = "bg-[#e50914] shadow-[0_0_15px_rgba(229,9,20,0.6)] text-white";
                                     bottomBorder = "border-b-4 border-[#b00710]";
@@ -174,7 +314,7 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
                                     <div key={seatLabel} className={clsx("flex", isMiddleGap && "mr-10")}>
                                         <button
                                             onClick={() => handleSeatClick(r, c)}
-                                            disabled={isBooked}
+                                            disabled={isBooked || !!lockedByOther}
                                             className={clsx(
                                                 "w-9 h-8 rounded-t-lg rounded-b-md text-[10px] font-medium flex items-center justify-center transition-all duration-200 relative group",
                                                 statusColor,
@@ -207,6 +347,10 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
         <div className="flex items-center gap-2">
             <div className="w-5 h-5 bg-[#5c0000] rounded-t-md border-b-4 border-[#3a0000]"></div>
             <span>Booked</span>
+        </div>
+        <div className="flex items-center gap-2">
+            <div className="w-5 h-5 bg-yellow-900/50 rounded-t-md border-b-4 border-yellow-900"></div>
+            <span>Reserved</span>
         </div>
       </div>
 

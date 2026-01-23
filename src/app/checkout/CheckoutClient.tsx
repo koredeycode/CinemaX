@@ -78,8 +78,27 @@ export default function CheckoutClient() {
       setItemToRemove(index);
   };
 
-  const executeRemoveItem = () => {
+  const executeRemoveItem = async () => {
       if (itemToRemove !== null) {
+          const item = cart[itemToRemove];
+          
+          if (item && item.seats.length > 0) {
+              try {
+                  await fetch("/api/bookings/release", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                          seats: item.seats,
+                          movieId: item.movieId,
+                          date: item.date,
+                          time: item.time
+                      })
+                  });
+              } catch (err) {
+                  console.error("Failed to release seats on removal:", err);
+              }
+          }
+
           removeFromCart(itemToRemove);
           toast.info("Item removed from cart");
           setItemToRemove(null);
