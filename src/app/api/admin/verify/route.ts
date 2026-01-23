@@ -1,3 +1,4 @@
+import { getAdminUser } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import Booking from "@/models/Booking";
 import { NextRequest, NextResponse } from "next/server";
@@ -5,6 +6,10 @@ import { NextRequest, NextResponse } from "next/server";
 import Movie from "@/models/Movie";
 
 export async function POST(req: NextRequest) {
+    if (!getAdminUser(req)) {
+        return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
+    }
+
     await dbConnect();
 
     try {

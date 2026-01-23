@@ -94,7 +94,7 @@ export default function AdminMoviesPage() {
         </div>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-x-auto">
         <table className="w-full text-left text-gray-300">
           <thead className="bg-gray-950 text-gray-400 font-medium uppercase text-xs">
             <tr>

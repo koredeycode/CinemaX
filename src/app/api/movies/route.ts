@@ -1,4 +1,4 @@
-import { verifyToken } from "@/lib/auth";
+import { getAdminUser } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import Movie from "@/models/Movie";
 import { NextRequest, NextResponse } from "next/server";
@@ -27,10 +27,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   await dbConnect();
 
-  const token = req.cookies.get("auth-token")?.value;
-  const payload = token ? verifyToken(token) : null;
-
-  if (!payload || payload.role !== "admin") {
+  if (!getAdminUser(req)) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
   }
 

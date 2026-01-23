@@ -1,7 +1,9 @@
+import { getUserFromRequest } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import Complaint from "@/models/Complaint";
 import { jwtVerify } from "jose";
 import { NextResponse } from "next/server";
+
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "supersecretjwtkeychangeinprod"
@@ -20,10 +22,11 @@ async function getUserId(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const userId = await getUserId(req);
-    if (!userId) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
+    const payload = getUserFromRequest(req);
+    
+     if (!payload?.userId) {
+          return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        }
 
     const { subject, message } = await req.json();
 
@@ -34,7 +37,7 @@ export async function POST(req: Request) {
     await dbConnect();
     
     const complaint = await Complaint.create({
-        user: userId,
+        user: payload.userId,
         subject,
         message
     });
@@ -48,14 +51,15 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
     try {
-      const userId = await getUserId(req);
-      if (!userId) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-      }
+      const payload = getUserFromRequest(req);
+      
+       if (!payload?.userId) {
+            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+          }
   
       await dbConnect();
       
-      const complaints = await Complaint.find({ user: userId }).sort({ createdAt: -1 });
+      const complaints = await Complaint.find({ user: payload.userId }).sort({ createdAt: -1 });
   
       return NextResponse.json({ success: true, complaints });
     } catch (error) {

@@ -45,3 +45,9 @@ export function getUserFromRequest(req: Request): TokenPayload | null {
   if (!token) return null;
   return verifyToken(token);
 }
+
+export function getAdminUser(req: Request): TokenPayload | null {
+  const payload = getUserFromRequest(req);
+  if (!payload || payload.role !== "admin") return null;
+  return payload;
+}

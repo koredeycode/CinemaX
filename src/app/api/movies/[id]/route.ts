@@ -1,4 +1,4 @@
-import { verifyToken } from "@/lib/auth";
+import { getAdminUser } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import Movie from "@/models/Movie";
 import { NextRequest, NextResponse } from "next/server";
@@ -34,10 +34,7 @@ export async function PUT(
   await dbConnect();
   const { id } = await params;
 
-  const token = req.cookies.get("auth-token")?.value;
-  const payload = token ? verifyToken(token) : null;
-
-  if (!payload || payload.role !== "admin") {
+  if (!getAdminUser(req)) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
   }
 
@@ -64,10 +61,7 @@ export async function DELETE(
   await dbConnect();
   const { id } = await params;
 
-  const token = req.cookies.get("auth-token")?.value;
-  const payload = token ? verifyToken(token) : null;
-
-  if (!payload || payload.role !== "admin") {
+  if (!getAdminUser(req)) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
   }
 

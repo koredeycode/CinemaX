@@ -1,27 +1,11 @@
+import { getAdminUser } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import Complaint from "@/models/Complaint";
-import { jwtVerify } from "jose";
 import { NextResponse } from "next/server";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "supersecretjwtkeychangeinprod"
-);
-
-// Admin check helper
-async function isAdmin(req: Request) {
-  const token = req.headers.get("cookie")?.split("; ").find(c => c.startsWith("auth-token="))?.split("=")[1];
-  if (!token) return false;
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload.role === "admin";
-  } catch {
-    return false;
-  }
-}
 
 export async function GET(req: Request) {
   try {
-    if (!(await isAdmin(req))) {
+    if (!getAdminUser(req)) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -40,7 +24,7 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
     try {
-        if (!(await isAdmin(req))) {
+        if (!getAdminUser(req)) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 

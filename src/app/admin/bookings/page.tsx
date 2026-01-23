@@ -58,7 +58,7 @@ function AdminBookingsContent() {
                 </div>
             </div>
 
-            <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+            <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-x-auto">
                 <table className="w-full text-left text-sm text-gray-400">
                     <thead className="bg-gray-800 text-white uppercase text-xs">
                         <tr>

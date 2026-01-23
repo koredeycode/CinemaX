@@ -63,7 +63,7 @@ export default function AdminComplaintsPage() {
     <div>
       <h1 className="text-3xl font-bold text-white mb-8">User Complaints</h1>
 
-      <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+      <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-x-auto">
         <table className="w-full text-left">
           <thead className="bg-gray-950 text-gray-400 uppercase text-xs">
             <tr>

@@ -2,15 +2,34 @@
 
 import Sidebar from "@/components/Sidebar";
 import { useAuthStore } from "@/store/authStore";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = useAuthStore();
+  const { user, token, hasHydrated } = useAuthStore();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasHydrated) {
+      if (!token || !user) {
+        router.push("/login");
+      } else if (user.role !== "admin") {
+        router.push("/dashboard");
+      }
+    }
+  }, [hasHydrated, token, user, router]);
+
+  if (!mounted || !hasHydrated || !user || user.role !== "admin") return null;
 
   const adminNavItems = [
     { name: "Dashboard", href: "/admin", icon: "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" },
@@ -25,10 +44,7 @@ export default function AdminLayout({
     <div className="min-h-screen bg-black">
       {/* Mobile Header with Hamburger */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900 sticky top-16 z-30">
-        <div className="flex items-center gap-2">
-           <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
-        </div>
-        <button 
+         <button 
           onClick={() => setIsMobileMenuOpen(true)}
           className="text-gray-400 hover:text-white"
         >
@@ -36,6 +52,9 @@ export default function AdminLayout({
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
         </button>
+        <div className="flex items-center gap-2">
+           <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
+        </div>
       </div>
 
       <div className="flex">
@@ -47,8 +66,8 @@ export default function AdminLayout({
         />
         
         {/* Main Content */}
-        <main className="flex-1 md:pl-64">
-           <div className="p-8">
+        <main className="flex-1 min-w-0 md:pl-64">
+           <div className="p-4 md:p-8">
                {children}
            </div>
         </main>
