@@ -10,7 +10,9 @@ interface SearchMoviesProps {
   className?: string;
 }
 
-export default function SearchMovies({ className }: SearchMoviesProps) {
+import { Suspense } from "react";
+
+function SearchMoviesContent({ className }: SearchMoviesProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [text, setText] = useState(searchParams.get("search") || "");
@@ -131,4 +133,12 @@ export default function SearchMovies({ className }: SearchMoviesProps) {
       )}
     </div>
   );
+}
+
+export default function SearchMovies(props: SearchMoviesProps) {
+    return (
+        <Suspense fallback={<div className={clsx("w-full h-10 bg-gray-800/50 rounded-full animate-pulse", props.className)}></div>}>
+            <SearchMoviesContent {...props} />
+        </Suspense>
+    );
 }

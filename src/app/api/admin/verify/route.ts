@@ -8,10 +8,7 @@ export async function POST(req: NextRequest) {
     try {
         const { bookingId } = await req.json();
         
-        const booking = await Booking.findById(bookingId).populate({
-            path: "showtime",
-            populate: { path: "movie" }
-        });
+        const booking = await Booking.findById(bookingId).populate('movie', 'title');
 
         if (!booking) {
              return NextResponse.json({ success: false, error: "Ticket not found" }, { status: 404 });

@@ -3,6 +3,9 @@ import MovieCarousel from "@/components/MovieCarousel";
 import MovieCard from "@/components/MovieCard";
 import { IMovie } from "@/models/Movie";
 
+
+export const dynamic = "force-dynamic";
+
 async function getMovies(status = "now_showing"): Promise<IMovie[]> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   

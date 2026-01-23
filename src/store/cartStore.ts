@@ -4,8 +4,11 @@ import { persist } from "zustand/middleware";
 
 export interface BookingSession {
   movie: IMovie | null;
-  showtimeId: string | null;
-  startTime: string | null;
+  movieId: string | null;
+  date: string | null;
+  time: string | null;
+  // showtimeId: string | null; // REMOVED
+  // startTime: string | null; // REMOVED
   seats: string[]; // ['A1', 'A2']
   price: number; // Price per seat
   concessions: {
@@ -26,7 +29,7 @@ interface CartState {
   currentSession: BookingSession | null;
   cart: BookingSession[];
   
-  startSession: (movie: IMovie, showtimeId: string, startTime: string, price: number) => void;
+  startSession: (movie: IMovie, date: string, time: string, price: number) => void;
   updateSeats: (seats: string[]) => void;
   updateConcessions: (items: BookingSession["concessions"]) => void;
   updateGuestDetails: (guest: BookingSession["guest"]) => void;
@@ -47,17 +50,21 @@ export const useCartStore = create<CartState>()(
       currentSession: null,
       cart: [],
 
-      startSession: (movie, showtimeId, startTime, price) => {
+      startSession: (movie, date, time, price) => {
         set((state) => {
-          // If starting a new session for a different showtime, wipe the old one
-          // If same showtime, keep it (allows user to come back later)
-          if (state.currentSession?.showtimeId === showtimeId) return state;
+          // If starting a new session for a different slot, wipe the old one
+          if (state.currentSession?.movieId === movie._id.toString() && 
+              state.currentSession?.date === date && 
+              state.currentSession?.time === time) {
+              return state;
+          }
           
           return {
             currentSession: {
               movie,
-              showtimeId,
-              startTime,
+              movieId: movie._id.toString(),
+              date,
+              time,
               price,
               seats: [],
               concessions: [],
@@ -88,14 +95,6 @@ export const useCartStore = create<CartState>()(
       updateGuestDetails: (guest) => {
         set((state) => {
           if (!state.currentSession) return state;
-          // Apply guest details to ALL cart items too, for convenience if they book multiple
-          // Or just keep it loosely coupled. Let's apply to current session.
-          
-          // Also update all items in cart? Typically guest contact is for the whole order.
-          // Let's decide: guest details are global for the checkout.
-          // BUT, looking at the interface, `guest` is inside `BookingSession`.
-          // For now, let's keep it on the session, and when checking out we use the first valid one or a global one.
-          // Actually, let's just update currentSession.
           return {
             currentSession: { ...state.currentSession, guest },
           };
@@ -133,9 +132,6 @@ export const useCartStore = create<CartState>()(
            const itemToEdit = state.cart[index];
            if (!itemToEdit) return state;
            
-           // If there is already a current session, we should probably push it to cart first?
-           // For simplicity, let's assume we swap them or just overwrite (user intention is to edit this one).
-           // Safe bet: Push current session to cart if it's valid, then edit the target.
            let newCart = state.cart.filter((_, i) => i !== index);
            
            if (state.currentSession && (state.currentSession.seats.length > 0 || state.currentSession.concessions.length > 0)) {

@@ -3,13 +3,15 @@
 import { IConcession } from "@/models/Concession";
 import { useCartStore } from "@/store/cartStore";
 import clsx from "clsx";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function FoodSelectionPage() {
+import { Suspense } from "react";
+
+function FoodSelectionContent() {
   const router = useRouter();
-  const params = useParams();
-  const showtimeId = params?.showtimeId as string;
+  // const params = useParams();
+  // const showtimeId = params?.showtimeId as string;
   const { currentSession, updateConcessions } = useCartStore();
 
   const [concessions, setConcessions] = useState<IConcession[]>([]);
@@ -33,16 +35,16 @@ export default function FoodSelectionPage() {
       });
   }, []);
 
-  // Hydrate local cart from session if it exists and matches this flow
+  // Hydrate local cart from session if it exists
   useEffect(() => {
-    if (currentSession && currentSession.showtimeId === showtimeId && currentSession.concessions.length > 0) {
+    if (currentSession && currentSession.concessions.length > 0) {
         const initialCart: { [key: string]: number } = {};
         currentSession.concessions.forEach(c => {
             initialCart[c.id] = c.quantity;
         });
         setCart(initialCart);
     }
-  }, [currentSession, showtimeId]);
+  }, [currentSession]);
 
   const updateQuantity = (itemId: string, delta: number) => {
     setCart((prev) => {
@@ -309,4 +311,28 @@ export default function FoodSelectionPage() {
         </div>
     </div>
   );
+}
+
+
+const FoodSkeleton = () => (
+    <div className="container mx-auto px-4 py-8 lg:py-12 max-w-6xl animate-pulse">
+        <div className="h-8 w-64 bg-gray-800 rounded mb-4"></div>
+        <div className="h-4 w-full md:w-96 bg-gray-900 rounded mb-8"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+           <div className="lg:col-span-2 space-y-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-24 bg-gray-900/50 rounded-xl border border-gray-800"></div>
+              ))}
+           </div>
+           <div className="hidden lg:block lg:col-span-1 h-64 bg-gray-900/50 rounded-xl border border-gray-800"></div>
+        </div>
+    </div>
+);
+
+export default function FoodSelectionPage() {
+    return (
+        <Suspense fallback={<FoodSkeleton />}>
+            <FoodSelectionContent />
+        </Suspense>
+    );
 }

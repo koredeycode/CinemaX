@@ -30,14 +30,12 @@ export async function GET(req: NextRequest) {
 
   try {
     const bookings = await Booking.find(query)
-        .populate({
-            path: 'showtime',
-            populate: { path: 'movie', select: 'title' }
-        })
+        .populate('movie', 'title posterUrl')
         .sort({ createdAt: -1 });
     
     return NextResponse.json({ success: true, data: bookings });
   } catch (error) {
+    console.error("Failed to fetch bookings", error)
     return NextResponse.json({ success: false, error: "Failed to fetch bookings" }, { status: 500 });
   }
 }
@@ -70,7 +68,9 @@ export async function POST(req: Request) {
             user: item.user || null, // If user is logged in
             userEmail: guestDetails.email, // Save email for association
             guestDetails: guestDetails || null,
-            showtime: item.showtimeId,
+            movie: item.movieId,
+            date: item.date,
+            time: item.time,
             seats: item.seats,
             foodDetails: item.concessions.map((c: any) => ({
                 id: c.id,

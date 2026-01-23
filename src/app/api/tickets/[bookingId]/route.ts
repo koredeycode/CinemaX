@@ -3,7 +3,6 @@ import dbConnect from "@/lib/db";
 import logger from "@/lib/logger";
 import Booking from "@/models/Booking";
 import { IMovie } from "@/models/Movie";
-import Showtime from "@/models/Showtime";
 import { NextRequest, NextResponse } from "next/server";
 import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import QRCode from "qrcode";
@@ -17,7 +16,7 @@ export async function GET(
     const { bookingId } = params;
 
     try {
-        const booking = await Booking.findById(bookingId).populate("showtime");
+        const booking = await Booking.findById(bookingId);
         if (!booking) {
             return NextResponse.json({ error: "Booking not found" }, { status: 404 });
         }
@@ -31,14 +30,15 @@ export async function GET(
             }
         }
 
-        const showtime = await Showtime.findById(booking.showtime).populate("movie");
-        if (!showtime) {
-             return NextResponse.json({ error: "Showtime not found" }, { status: 404 });
+        const movie = await Booking.findById(bookingId).populate("movie").then(b => b?.movie as unknown as IMovie);
+        
+        if (!movie) {
+             return NextResponse.json({ error: "Movie not found" }, { status: 404 });
         }
         
-        const movie = showtime.movie as unknown as IMovie;
-        const dateStr = new Date(showtime.startTime).toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        const timeStr = new Date(showtime.startTime).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' });
+        const dateObj = new Date(booking.date);
+        const dateStr = dateObj.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        const timeStr = booking.time;
 
         // 1. Create PDF (Landscape 600x250)
         const pdfDoc = await PDFDocument.create();

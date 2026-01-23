@@ -26,10 +26,7 @@ export async function GET(req: Request) {
     // Fetch bookings for this user by EMAIL
     const bookings = await Booking.find({ userEmail: user.email })
       .sort({ createdAt: -1 })  
-      .populate({
-         path: "showtime",
-         populate: { path: "movie" } 
-      });
+      .populate('movie', 'title posterUrl');
     
     return NextResponse.json({ success: true, bookings });
   } catch (error) {

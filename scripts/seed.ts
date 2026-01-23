@@ -5,7 +5,6 @@ import dbConnect from "../src/lib/db";
 import logger from "../src/lib/logger";
 import Booking from "../src/models/Booking";
 import Movie from "../src/models/Movie";
-import Showtime from "../src/models/Showtime";
 import User from "../src/models/User";
 
 const sampleMovies = [
@@ -179,7 +178,6 @@ async function seed() {
     // 1. Clear Database
     logger.info("🧹 Clearing existing data...");
     await Booking.deleteMany({});
-    await Showtime.deleteMany({});
     await Movie.deleteMany({});
     await User.deleteMany({});
 
@@ -207,46 +205,28 @@ async function seed() {
 
     // 3. Seed Movies
     logger.info("🎬 Seeding Movies...");
-    const movies = await Movie.insertMany(sampleMovies);
-    logger.info(`   - Added ${movies.length} movies`);
-
-    // 4. Seed Showtimes
-    logger.info("📅 Seeding Showtimes...");
-    const showtimes = [];
-    const today = new Date();
-    today.setHours(0,0,0,0);
     
-    // Create showtimes for the next 3 days
-    for (let i = 0; i < 3; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
-
-        for (const movie of movies) {
-            // Randomly pick 2-3 showtimes per movie per day
-            const slots = [10, 14, 18, 21]; // 10AM, 2PM, 6PM, 9PM
-            
-            for (const hour of slots) {
-                if (Math.random() > 0.7) continue; // Skip some slots randomly
-
-                const startTime = new Date(date);
-                startTime.setHours(hour, 0, 0, 0);
-
-                // Add random minutes (00, 15, 30, 45)
-                startTime.setMinutes([0, 15, 30, 45][Math.floor(Math.random() * 4)]);
-
-                showtimes.push({
-                    movie: movie._id,
-                    startTime: startTime,
-                    price: 3000 + Math.floor(Math.random() * 5000), // ₦3000 - ₦8000
-                    seatMap: { rows: 8, cols: 12, unavailable: [] },
-                    bookedSeats: []
-                });
-            }
-        }
+    // Generate Schedules for next 7 days
+    const schedules: { date: string; times: string[] }[] = [];
+    const today = new Date();
+    for(let i=0; i<7; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+        schedules.push({
+            date: dateStr,
+            times: ["10:00", "13:00", "16:00", "19:00", "22:00"]
+        });
     }
 
-    const createdShowtimes = await Showtime.insertMany(showtimes);
-    logger.info(`   - Added ${createdShowtimes.length} showtimes`);
+    const moviesWithSchedules = sampleMovies.map(m => ({
+        ...m,
+        price: 4500,
+        schedule: schedules
+    }));
+
+    const movies = await Movie.insertMany(moviesWithSchedules);
+    logger.info(`   - Added ${movies.length} movies with schedules`);
 
     // 5. Seed Concessions
     logger.info("🍿 Seeding Concessions...");
@@ -257,21 +237,23 @@ async function seed() {
     logger.info("🎟️ Seeding Bookings...");
     const user = await User.findOne({ email: "user@cinemax.com" });
     
-    if (user && createdShowtimes.length > 0) {
-        const booking1Showtime = createdShowtimes[0];
-        const booking2Showtime = createdShowtimes[1];
+    if (user && movies.length > 0) {
+        const movie = movies[0];
+        const schedule = movie.schedule[0]; // Today
 
         // Booking 1: Confirmed
         await Booking.create({
             user: user._id,
             userEmail: user.email,
-            showtime: booking1Showtime._id,
+            movieId: movie._id,
+            date: schedule.date,
+            time: schedule.times[1], // 13:00
             seats: ["D4", "D5"],
             foodDetails: [
                 { id: concessions[0]._id.toString(), name: concessions[0].name, qty: 1, cost: concessions[0].price },
                 { id: concessions[2]._id.toString(), name: concessions[2].name, qty: 2, cost: concessions[2].price }
             ],
-            totalPrice: (booking1Showtime.price * 2) + concessions[0].price + (concessions[2].price * 2),
+            totalPrice: (movie.price * 2) + concessions[0].price + (concessions[2].price * 2),
             status: "confirmed",
             paymentIntentId: "SEED-REF-001"
         });
@@ -280,22 +262,16 @@ async function seed() {
         await Booking.create({
             user: user._id,
             userEmail: user.email,
-            showtime: booking2Showtime._id,
+            movieId: movies[1]._id,
+             date: schedule.date,
+            time: schedule.times[3], // 19:00
             seats: ["F10"],
-            totalPrice: booking2Showtime.price,
+            totalPrice: movies[1].price,
             status: "pending", // Emulate an abandoned checkout
             paymentIntentId: "SEED-REF-002"
         });
 
         logger.info(`   - Created 2 sample bookings for ${user.email}`);
-
-        // Update showtimes to reflect booked seats
-        await Showtime.updateOne(
-            { _id: booking1Showtime._id },
-            { $push: { bookedSeats: { $each: ["D4", "D5"] } } }
-        );
-         // Note: Pending booking usually reserves seats temporarily, but for seed simplicity we might skip or add them. 
-         // Let's perform cleanup/reset if re-seeding, which is handled at the top.
     }
 
     logger.info("✅ Seeding Complete!");

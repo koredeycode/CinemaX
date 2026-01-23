@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -14,24 +15,6 @@ export default function VerifyTicketPage() {
     setResult(null);
     setError("");
 
-    // In a real app we might have a dedicated verify endpoint, 
-    // or just fetch ticket details. Since we have a PDF route, 
-    // we could check existence via GET /api/tickets/[id] but that downloads PDF.
-    // Let's create a quick client-side check via a new API or just re-use fetching booking via admin API if available.
-    // Assuming we want to verify details, let's assume we can fetch booking info. 
-    // But we don't have a generic "get booking by id" API exposed yet except for the PDF.
-    
-    // Quick solution: We will call a verify action. 
-    // Since we don't have a specific ID endpoint, let's implement a quick client-side fetch 
-    // to a new route `/api/admin/verify-booking` or just assume we'd add one.
-    // For now, let's fetch from our existing `api/bookings`? No, that's POST.
-    
-    // I'll implement a simple server action or just a fetch to `/api/tickets/[id]` isn't right.
-    // Let's just mock the behavior by trying to "find" it if we had an API.
-    // Better: I'll add a simple GET handler to `src/app/api/admin/verify/route.ts` quickly?
-    // Or simpler: Reuse the logic. 
-    // Actually, I'll just make a POST to `/api/admin/verify` with ID.
-    
     try {
         const res = await fetch("/api/admin/verify", {
             method: "POST",
@@ -97,16 +80,22 @@ export default function VerifyTicketPage() {
                     <div className="space-y-2 text-sm">
                         <div className="flex justify-between border-b border-white/10 pb-2">
                             <span className="text-gray-400">Guest</span>
-                            <span className="text-white font-medium">{result.guestDetails.name}</span>
+                            <span className="text-white font-medium">{result.guestDetails?.name || "N/A"}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/10 pb-2">
                             <span className="text-gray-400">Movie</span>
-                            <span className="text-white font-medium">{result.showtime.movie.title}</span>
+                            <span className="text-white font-medium">{result.movie?.title || "Unknown"}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/10 pb-2">
+                            <span className="text-gray-400">Date</span>
+                            <span className="text-white font-medium">
+                                {result.date ? new Date(result.date).toLocaleDateString() : result.date}
+                            </span>
+                        </div>
+                         <div className="flex justify-between border-b border-white/10 pb-2">
                             <span className="text-gray-400">Time</span>
                             <span className="text-white font-medium">
-                                {new Date(result.showtime.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                {result.time}
                             </span>
                         </div>
                          <div className="flex justify-between pt-2">

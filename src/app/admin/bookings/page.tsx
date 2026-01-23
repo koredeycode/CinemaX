@@ -4,7 +4,10 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export default function AdminBookingsPage() {
+import { Suspense } from "react";
+
+
+function AdminBookingsContent() {
     const [bookings, setBookings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -100,9 +103,17 @@ export default function AdminBookingsPage() {
                                         <div className="text-xs">{booking.guestDetails?.email || booking.userEmail}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {booking.showtime?.movie?.title || "Unknown"}
+                                        {booking.movie?.title || "Unknown"}
                                         <div className="text-xs text-gray-500">
-                                            {booking.showtime ? new Date(booking.showtime.startTime).toLocaleString() : ""}
+                                           {(() => {
+                                                if (!booking.date || !booking.time) return "N/A";
+                                                try {
+                                                    const dateStr = new Date(booking.date).toLocaleDateString();
+                                                    return `${dateStr} @ ${booking.time}`;
+                                                } catch (e) {
+                                                    return `${booking.date} @ ${booking.time}`;
+                                                }
+                                           })()}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">{booking.seats.join(", ")}</td>
@@ -121,5 +132,13 @@ export default function AdminBookingsPage() {
                 </table>
             </div>
         </div>
+    );
+}
+
+export default function AdminBookingsPage() {
+    return (
+        <Suspense fallback={<div className="text-white p-8">Loading...</div>}>
+            <AdminBookingsContent />
+        </Suspense>
     );
 }

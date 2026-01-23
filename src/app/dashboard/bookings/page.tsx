@@ -5,15 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+
 interface Booking {
   _id: string;
-  showtime: {
-     movie: {
-         title: string;
-         posterUrl: string;
-     };
-     startTime: string;
+  movie: {
+     title: string;
+     posterUrl: string;
   };
+  date: string;
+  time: string;
   totalPrice: number;
   status: string;
   seats: string[];
@@ -66,10 +66,10 @@ export default function MyBookingsPage() {
              {bookings.map((booking) => (
                  <div key={booking._id} className="bg-gray-900 rounded-xl p-4 border border-gray-800 flex gap-4 items-center">
                     <div className="w-16 h-24 relative bg-gray-800 rounded-lg overflow-hidden shrink-0">
-                         {booking.showtime?.movie?.posterUrl && (
+                         {booking.movie?.posterUrl && (
                              <Image 
-                                src={booking.showtime.movie.posterUrl} 
-                                alt={booking.showtime.movie.title}
+                                src={booking.movie.posterUrl} 
+                                alt={booking.movie.title}
                                 fill
                                 className="object-cover"
                              />
@@ -79,11 +79,19 @@ export default function MyBookingsPage() {
                     <div className="flex-1">
                         <div className="flex justify-between items-start">
                             <div>
-                                <h3 className="font-bold text-white text-lg">{booking.showtime?.movie?.title || "Unknown Movie"}</h3>
+                                <h3 className="font-bold text-white text-lg">{booking.movie?.title || "Unknown Movie"}</h3>
                                 <p className="text-gray-400 text-sm">
-                                    {new Date(booking.showtime?.startTime).toLocaleString(undefined, {
-                                        weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit"
-                                    })}
+                                    {(() => {
+                                        if (!booking.date || !booking.time) return "N/A";
+                                        try {
+                                            const dateStr = new Date(booking.date).toLocaleDateString(undefined, {
+                                                weekday: "short", month: "short", day: "numeric"
+                                            });
+                                            return `${dateStr} @ ${booking.time}`;
+                                        } catch (e) {
+                                            return `${booking.date} @ ${booking.time}`;
+                                        }
+                                    })()}
                                 </p>
                             </div>
                             <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${

@@ -11,6 +11,11 @@ export interface IMovie extends Document {
   rating: string;
   genres: string[];
   status: "now_showing" | "coming_soon" | "not_showing";
+  price: number;
+  schedule: {
+    date: string;
+    times: string[];
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +36,11 @@ const MovieSchema: Schema = new Schema(
       enum: ["now_showing", "coming_soon", "not_showing"],
       default: "coming_soon",
     },
+    price: { type: Number, default: 4500 }, // Default ticket price
+    schedule: [{
+      date: { type: String, required: true }, // YYYY-MM-DD
+      times: { type: [String], required: true } // ["14:00", "19:00"]
+    }],
   },
   { timestamps: true }
 );

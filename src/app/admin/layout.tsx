@@ -31,9 +31,7 @@ export default function AdminLayout({
           <Link href="/admin/movies" className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
             Movies
           </Link>
-          <Link href="/admin/showtimes" className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
-            Showtimes
-          </Link>
+
           <Link href="/admin/bookings" className="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
             Bookings
           </Link>

@@ -1,8 +1,6 @@
+import BookingSelector from "@/components/BookingSelector";
 import MovieHero from "@/components/MovieHero";
-
-import ShowtimeSelector from "@/components/ShowtimeSelector";
 import { IMovie } from "@/models/Movie";
-import { IShowtime } from "@/models/Showtime";
 import { notFound } from "next/navigation";
 
 async function getMovie(id: string): Promise<IMovie | null> {
@@ -17,18 +15,6 @@ async function getMovie(id: string): Promise<IMovie | null> {
   }
 }
 
-async function getShowtimes(movieId: string): Promise<IShowtime[]> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-  try {
-    const res = await fetch(`${apiUrl}/api/showtimes?movieId=${movieId}`, { cache: "no-store" });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.data;
-  } catch (error) {
-    return [];
-  }
-}
-
 export default async function MoviePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const movie = await getMovie(slug);
@@ -36,10 +22,6 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
   if (!movie) {
     notFound();
   }
-
-  const showtimes = await getShowtimes(movie._id.toString());
-
-
 
   return (
     <div className="bg-black min-h-screen">
@@ -106,9 +88,9 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                Showtimes
+                                Book Tickets
                             </h2>
-                            <ShowtimeSelector showtimes={showtimes} />
+                            <BookingSelector movie={movie} />
                         </>
                     ) : (
                         <div className="text-center py-10">
@@ -132,8 +114,6 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                         </div>
                     )}
                  </div>
-
-                 {/* Optional: Add a promotional card or something else here if needed */}
             </div>
           </div>
         </div>

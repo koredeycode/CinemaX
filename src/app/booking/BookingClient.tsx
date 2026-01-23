@@ -2,30 +2,33 @@
 
 import SeatMap from "@/components/SeatMap";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { IShowtime } from "@/models/Showtime";
-import { useParams } from "next/navigation";
+import { IMovie } from "@/models/Movie";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function SeatSelectionPage() {
-  const params = useParams();
-  const showtimeId = params?.showtimeId as string;
-  const [showtime, setShowtime] = useState<IShowtime | null>(null);
+export default function BookingClient() {
+  const searchParams = useSearchParams();
+  const movieId = searchParams.get('movieId');
+  const date = searchParams.get('date');
+  const time = searchParams.get('time');
+
+  const [movie, setMovie] = useState<IMovie | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!showtimeId) return;
+    if (!movieId) return;
 
-    fetch(`/api/showtimes/${showtimeId}`)
+    fetch(`/api/movies/${movieId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setShowtime(data.data);
+        if (data.success) setMovie(data.data);
         setLoading(false);
       })
       .catch((err) => {
         console.error(err);
         setLoading(false);
       });
-  }, [showtimeId]);
+  }, [movieId]);
 
   if (loading) {
     return (
@@ -34,21 +37,15 @@ export default function SeatSelectionPage() {
             <div className="h-4 w-48 mx-auto bg-gray-800 rounded mb-8 animate-pulse"></div>
             
             <div className="w-full max-w-5xl mx-auto p-6 bg-gray-900/50 rounded-xl border border-gray-800 animate-pulse min-h-[500px] flex flex-col items-center">
-                {/* Curved Screen Skeleton */}
                 <div className="w-full max-w-2xl h-12 mb-10 relative">
                     <div className="absolute top-0 left-0 w-full h-full border-t-4 border-gray-700 rounded-[50%] opacity-50"></div>
                 </div>
-                
-                {/* Seat Grid Skeleton */}
-                <div className="flex gap-4">
-                     {/* Row Labels Skeleton */}
+                 <div className="flex gap-4">
                      <div className="flex flex-col gap-3 pt-1">
                         {Array.from({ length: 8 }).map((_, i) => (
                             <div key={i} className={`w-4 h-8 bg-gray-800 rounded ${i === 3 ? 'mb-10' : ''}`}></div>
                         ))}
                      </div>
-
-                     {/* Seats Skeleton - Split into two blocks for visual realism */}
                      <div className="flex gap-8">
                         <div className="grid grid-cols-4 gap-3">
                             {Array.from({ length: 32 }).map((_, i) => (
@@ -67,12 +64,12 @@ export default function SeatSelectionPage() {
     );
   }
 
-  if (!showtime) {
+  if (!movie || !date || !time) {
     return (
         <div className="container mx-auto px-4 py-20">
              <EmptyState 
-                title="Showtime Not Found" 
-                message="The showtime you are looking for does not exist or has been removed."
+                title="Invalid Booking Session" 
+                message="Please select a movie and showtime first."
                 actionLabel="Back to Movies"
                 actionLink="/"
              />
@@ -80,13 +77,16 @@ export default function SeatSelectionPage() {
     );
   }
 
+  const dateObj = new Date(date);
+  const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
   return (
     <div className="container mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold text-white mb-2 text-center">Select Seats</h1>
       <p className="text-gray-400 text-center mb-8">
-        {(showtime.movie as any).title} - {new Date(showtime.startTime).toLocaleString()}
+        {movie.title} • {dateStr} • {time}
       </p>
-      <SeatMap showtime={showtime} />
+      <SeatMap movie={movie} date={date} time={time} />
     </div>
   );
 }

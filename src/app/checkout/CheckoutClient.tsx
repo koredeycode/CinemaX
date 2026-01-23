@@ -94,9 +94,9 @@ export default function CheckoutClient() {
       editSession(index);
       
       if (path === 'seats') {
-          router.push(`/booking/${item.showtimeId}`);
+          router.push(`/booking?movieId=${item.movieId}&date=${item.date}&time=${item.time}`);
       } else {
-          router.push(`/booking/${item.showtimeId}/food`);
+          router.push(`/booking/food`);
       }
   };
 
@@ -236,9 +236,7 @@ export default function CheckoutClient() {
                             <div className="flex-1">
                                 <h3 className="text-lg font-bold text-white pr-8">{item.movie?.title}</h3>
                                 <p className="text-gray-400 text-sm mb-2">
-                                    {item.startTime && new Date(item.startTime).toLocaleString(undefined, {
-                                        weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit"
-                                    })}
+                                    {item.date && new Date(item.date).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} • {item.time}
                                 </p>
                                 
                                 <div className="flex flex-wrap gap-2 mb-3 items-center">

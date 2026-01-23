@@ -8,7 +8,9 @@ export interface IBooking extends Document {
     email: string;
     phone: string;
   };
-  showtime: mongoose.Types.ObjectId;
+  movie: mongoose.Types.ObjectId;
+  date: string;
+  time: string;
   seats: string[];
   foodDetails?: {
     id: string;
@@ -32,11 +34,9 @@ const BookingSchema: Schema = new Schema(
       email: String,
       phone: String,
     },
-    showtime: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Showtime",
-      required: true,
-    },
+    movie: { type: mongoose.Schema.Types.ObjectId, ref: "Movie", required: true },
+    date: { type: String, required: true },
+    time: { type: String, required: true },
     seats: { type: [String], required: true },
     foodDetails: [
       {
