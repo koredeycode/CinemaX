@@ -77,7 +77,8 @@ export default function BookingClient() {
     );
   }
 
-  const dateObj = new Date(date);
+  const [y, m, d] = date.split('-').map(Number);
+  const dateObj = new Date(y, m - 1, d);
   const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   return (

@@ -2,7 +2,6 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 
 interface Booking {
@@ -25,7 +24,6 @@ interface Booking {
 export default function TicketPage() {
   const { id } = useParams();
   const [booking, setBooking] = useState<Booking | null>(null);
-  const [qrCodeData, setQrCodeData] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,10 +33,6 @@ export default function TicketPage() {
          if (data.success) {
              const found = data.bookings.find((b: { _id: string; }) => b._id === id);
              setBooking(found || null);
-             if (found) {
-                 QRCode.toDataURL(found._id) // Use Booking ID for QR to match PDF
-                    .then(url => setQrCodeData(url));
-             }
          }
          setLoading(false);
       });
@@ -57,100 +51,20 @@ export default function TicketPage() {
   
   if (!booking) return <div className="text-white p-8">Ticket not found</div>;
 
-  let dateStr = "N/A";
-  let timeStr = "N/A";
-
-  if (booking.date && booking.time) {
-      try {
-           dateStr = new Date(booking.date).toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
-           timeStr = booking.time;
-      } catch (e) {
-           dateStr = booking.date;
-           timeStr = booking.time;
-      }
-  }
-
-
   return (
     <div className="max-w-4xl mx-auto p-4">
        <div className="mb-8 text-center">
            <h1 className="text-3xl font-bold text-white mb-2">Your Ticket</h1>
-           <p className="text-gray-400">Ready for the show! You can download the PDF version below.</p>
+           <p className="text-gray-400">Your ticket is ready. You can view it below or download it.</p>
        </div>
 
-       {/* Ticket Container - Landscape */}
-       <div className="bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[300px] w-full max-w-[800px] mx-auto">
-           {/* Left Header Strip (Red) - Hidden on mobile, shown on desktop */}
-           <div className="hidden md:flex w-16 bg-red-700 items-end justify-center py-8 relative">
-                <span className="text-white font-bold tracking-[0.2em] transform -rotate-90 whitespace-nowrap absolute bottom-24 text-xl">
-                    CINEMA TICKET
-                </span>
-           </div>
-
-           {/* Main Section */}
-           <div className="flex-1 p-8 relative border-b-2 md:border-b-0 md:border-r-2 border-dashed border-gray-300">
-               {/* Mobile "Strip" */}
-               <div className="md:hidden bg-red-700 text-white text-center py-2 mb-4 rounded font-bold tracking-widest">
-                   CINEMA TICKET
-               </div>
-
-               <h2 className="text-3xl md:text-4xl font-black text-gray-800 leading-tight mb-8 uppercase">
-                   {booking.movie?.title || "Unknown Movie"}
-               </h2>
-
-               <div className="grid grid-cols-2 gap-y-6 gap-x-4">
-                   <div>
-                       <p className="text-xs text-gray-400 font-medium mb-1">DATE</p>
-                       <p className="text-lg font-bold text-gray-800">{dateStr}</p>
-                   </div>
-                   <div>
-                       <p className="text-xs text-gray-400 font-medium mb-1">TIME</p>
-                       <p className="text-lg font-bold text-gray-800">{timeStr}</p>
-                   </div>
-                   <div>
-                       <p className="text-xs text-gray-400 font-medium mb-1">HALL</p>
-                       <p className="text-lg font-bold text-gray-800">HALL 1</p>
-                   </div>
-                   <div>
-                       <p className="text-xs text-gray-400 font-medium mb-1">GUEST</p>
-                       <div className="text-lg font-bold text-gray-800 truncate" title={booking.guestDetails?.name || "Guest"}>
-                          {booking.guestDetails?.name || "Guest"}
-                       </div>
-                   </div>
-               </div>
-
-               {/* Cutout Circles for perforation effect */}
-               <div className="absolute -top-3 -right-3 w-6 h-6 bg-black rounded-full hidden md:block"></div>
-               <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-black rounded-full hidden md:block"></div>
-           </div>
-
-           {/* Stub Section */}
-           <div className="w-full md:w-80 bg-gray-50 p-8 flex flex-col items-center justify-between relative">
-               <div className="w-full bg-red-700 text-white text-center py-2 rounded-lg font-bold text-lg mb-4">
-                   ADMIT ONE
-               </div>
-
-               <div className="text-center w-full mb-4">
-                   <p className="text-xs text-gray-400 font-medium mb-1">SEAT</p>
-                   <p className="text-4xl font-black text-gray-800 break-words leading-none">
-                       {booking.seats.length > 3 ? `${booking.seats[0]} +${booking.seats.length - 1}` : booking.seats.join(", ")}
-                   </p>
-               </div>
-
-               <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-100">
-                    {qrCodeData && (
-                        <img src={qrCodeData} alt="QR Code" className="w-32 h-32 object-contain" />
-                    )}
-               </div>
-               
-               <p className="text-[10px] text-gray-400 mt-2 font-mono">
-                   ID: {booking._id.substring(0,8).toUpperCase()}
-               </p>
-
-                {/* Cutout Circles for perforation effect (Stub side) */}
-               <div className="absolute -top-3 -left-3 w-6 h-6 bg-black rounded-full hidden md:block"></div>
-               <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-black rounded-full hidden md:block"></div>
-           </div>
+       {/* PDF Viewer Iframe */}
+       <div className="w-full aspect-[2.4/1] min-h-[300px] bg-gray-800 rounded-3xl overflow-hidden shadow-2xl">
+            <iframe 
+                src={`/api/tickets/${id}#toolbar=0&navpanes=0&scrollbar=0`}
+                className="w-full h-full border-0"
+                title="Ticket PDF"
+            />
        </div>
 
        <div className="mt-8 flex justify-center">

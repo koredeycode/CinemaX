@@ -1,6 +1,7 @@
 import { verifyToken } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Booking from '@/models/Booking';
+import Movie from '@/models/Movie';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
@@ -29,9 +30,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+     // Ensure Movie model is registered for populate
+     const _ = Movie;
+
     const bookings = await Booking.find(query)
-        .populate('movie', 'title posterUrl')
-        .sort({ createdAt: -1 });
+        .populate({ path: 'movie', select: 'title posterUrl', strictPopulate: false })
+        .sort({ createdAt: -1 })
+        .lean();
     
     return NextResponse.json({ success: true, data: bookings });
   } catch (error) {

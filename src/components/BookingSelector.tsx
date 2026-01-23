@@ -32,7 +32,9 @@ export default function BookingSelector({ movie }: BookingSelectorProps) {
             <h3 className="text-gray-400 text-sm font-bold uppercase mb-3">Select Date</h3>
             <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
                 {movie.schedule.map((slot) => {
-                    const dateObj = new Date(slot.date);
+                    // Create date object treating the string as local date to avoid timezone shifts
+                    const [y, m, d] = slot.date.split('-').map(Number);
+                    const dateObj = new Date(y, m - 1, d);
                     const isSelected = selectedDate === slot.date;
                     
                     return (

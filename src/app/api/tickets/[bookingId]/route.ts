@@ -2,7 +2,7 @@ import { getUserFromRequest } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import logger from "@/lib/logger";
 import Booking from "@/models/Booking";
-import { IMovie } from "@/models/Movie";
+import Movie, { IMovie } from "@/models/Movie";
 import { NextRequest, NextResponse } from "next/server";
 import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import QRCode from "qrcode";
@@ -16,7 +16,12 @@ export async function GET(
     const { bookingId } = params;
 
     try {
-        const booking = await Booking.findById(bookingId);
+        // Ensure Movie model is registered
+        const _ = Movie;
+
+        // Use lean() to get plain object and bypass hydration issues
+        const booking = await Booking.findById(bookingId).lean() as any; 
+        
         if (!booking) {
             return NextResponse.json({ error: "Booking not found" }, { status: 404 });
         }
@@ -30,9 +35,14 @@ export async function GET(
             }
         }
 
-        const movie = await Booking.findById(bookingId).populate("movie").then(b => b?.movie as unknown as IMovie);
+        // Manual population for robustness
+        let movie: IMovie | null = null;
+        if (booking.movie) {
+            movie = await Movie.findById(booking.movie).lean() as unknown as IMovie;
+        }
         
         if (!movie) {
+             logger.error(`Movie not found for booking ${bookingId}. Movie ID: ${booking.movie}`);
              return NextResponse.json({ error: "Movie not found" }, { status: 404 });
         }
         
@@ -175,7 +185,7 @@ export async function GET(
         return new NextResponse(Buffer.from(pdfBytes), {
             headers: {
                 "Content-Type": "application/pdf",
-                "Content-Disposition": `attachment; filename="ticket-${bookingId}.pdf"`,
+                "Content-Disposition": `inline; filename="ticket-${bookingId}.pdf"`,
             },
         });
 
