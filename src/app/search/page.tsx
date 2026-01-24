@@ -1,3 +1,4 @@
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/Motion";
 import MovieCard from "@/components/MovieCard";
 import { IMovie } from "@/models/Movie";
 import Link from "next/link";
@@ -41,19 +42,23 @@ export default async function SearchPage(props: {
       </div>
 
       {movies.length === 0 ? (
-        <div className="text-center py-20 bg-gray-900 rounded-2xl border border-gray-800">
-          <div className="text-6xl mb-4">🔍</div>
-          <h2 className="text-xl text-white font-bold mb-2">No movies found</h2>
-          <p className="text-gray-400">
-            We couldn't find any movies matching "{search}". Try a different keyword.
-          </p>
-        </div>
+        <FadeIn>
+          <div className="text-center py-20 bg-gray-900 rounded-2xl border border-gray-800">
+            <div className="text-6xl mb-4">🔍</div>
+            <h2 className="text-xl text-white font-bold mb-2">No movies found</h2>
+            <p className="text-gray-400">
+              We couldn't find any movies matching "{search}". Try a different keyword.
+            </p>
+          </div>
+        </FadeIn>
       ) : (
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <StaggerContainer className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {movies.map((movie) => (
-            <MovieCard key={(movie as any)._id} movie={movie} />
+            <StaggerItem key={(movie as any)._id}>
+                <MovieCard movie={movie} />
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       )}
     </div>
   );

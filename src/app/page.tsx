@@ -1,3 +1,4 @@
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/Motion";
 import MovieCarousel from "@/components/MovieCarousel";
 
 import MovieCard from "@/components/MovieCard";
@@ -40,48 +41,56 @@ export default async function Home() {
 
       {/* Now Showing Section */}
       <section id="now-showing" className="scroll-mt-20 my-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-          <h2 className="text-2xl font-bold text-white border-l-4 border-primary pl-4">
-            Now Showing
-          </h2>
-        </div>
+        <FadeIn>
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <h2 className="text-2xl font-bold text-white border-l-4 border-primary pl-4">
+                Now Showing
+            </h2>
+            </div>
+        </FadeIn>
         
         {nowShowingMovies.length === 0 ? (
-          <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800">
-             <p className="text-gray-500">No movies currently showing.</p>
-          </div>
+          <FadeIn>
+            <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800">
+                <p className="text-gray-500">No movies currently showing.</p>
+            </div>
+          </FadeIn>
         ) : (
-          <div className="flex overflow-x-auto gap-6 pb-8 snap-x scrollbar-hide">
+          <StaggerContainer className="flex overflow-x-auto gap-6 pb-8 snap-x scrollbar-hide">
             {nowShowingMovies.map((movie) => (
-              <div key={(movie as any)._id} className="min-w-[200px] w-[200px] snap-start">
+              <StaggerItem key={(movie as any)._id} className="min-w-[200px] w-[200px] snap-start">
                   <MovieCard movie={movie} />
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         )}
       </section>
 
       {/* Coming Soon Section */}
       <section id="coming-soon" className="scroll-mt-20 my-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-          <h2 className="text-2xl font-bold text-white border-l-4 border-blue-500 pl-4">
-            Coming Soon
-          </h2>
-        </div>
+        <FadeIn delay={0.2}>
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <h2 className="text-2xl font-bold text-white border-l-4 border-blue-500 pl-4">
+                Coming Soon
+            </h2>
+            </div>
+        </FadeIn>
         
         {comingSoonMovies.length === 0 ? (
-          <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800">
-             <div className="text-4xl mb-3 opacity-50">📅</div>
-             <p className="text-gray-500">More exciting titles coming soon.</p>
-          </div>
-        ) : (
-          <div className="flex overflow-x-auto gap-6 pb-8 snap-x scrollbar-hide">
-            {comingSoonMovies.map((movie) => (
-              <div key={(movie as any)._id} className="min-w-[200px] w-[200px] snap-start">
-                  <MovieCard movie={movie} />
+          <FadeIn>
+              <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800">
+                <div className="text-4xl mb-3 opacity-50">📅</div>
+                <p className="text-gray-500">More exciting titles coming soon.</p>
               </div>
+          </FadeIn>
+        ) : (
+          <StaggerContainer className="flex overflow-x-auto gap-6 pb-8 snap-x scrollbar-hide">
+            {comingSoonMovies.map((movie) => (
+              <StaggerItem key={(movie as any)._id} className="min-w-[200px] w-[200px] snap-start">
+                  <MovieCard movie={movie} />
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         )}
       </section>
     </div>

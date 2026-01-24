@@ -1,4 +1,5 @@
 import BookingSelector from "@/components/BookingSelector";
+import { FadeIn } from "@/components/Motion";
 import MovieHero from "@/components/MovieHero";
 import { IMovie } from "@/models/Movie";
 import { notFound } from "next/navigation";
@@ -33,7 +34,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           <div className="lg:col-span-2 space-y-12">
             
             {/* Storyline Section */}
-            <section className="animate-fade-in-up">
+            <FadeIn>
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                 <span className="w-1 h-8 bg-primary rounded-full"></span>
                 Storyline
@@ -41,10 +42,10 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               <div className="text-gray-300 text-lg leading-relaxed space-y-4">
                 <p>{movie.description}</p>
               </div>
-            </section>
+            </FadeIn>
 
              {/* Details Grid */}
-             <section className="animate-fade-in-up delay-100">
+             <FadeIn delay={0.1}>
                 <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                     <span className="w-1 h-8 bg-primary rounded-full"></span>
                     About the Movie
@@ -75,13 +76,13 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                          <p className="text-white text-xl font-medium">{movie.rating}</p>
                     </div>
                 </div>
-            </section>
+            </FadeIn>
           </div>
 
           {/* Right Col: Booking Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
-                 <div className="bg-gray-900/30 backdrop-blur-xl border border-white/10 p-6 rounded-3xl shadow-2xl">
+                 <FadeIn delay={0.2} className="bg-gray-900/30 backdrop-blur-xl border border-white/10 p-6 rounded-3xl shadow-2xl">
                     {movie.status === "now_showing" ? (
                         <>
                             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
@@ -113,7 +114,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                             )}
                         </div>
                     )}
-                 </div>
+                 </FadeIn>
             </div>
           </div>
         </div>
