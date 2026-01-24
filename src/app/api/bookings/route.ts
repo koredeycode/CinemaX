@@ -82,7 +82,7 @@ export async function POST(req: Request) {
             })),
             totalPrice,
             status: 'pending',
-            paymentIntentId: paymentReference, // We use this to group them and verify payment
+            referenceId: paymentReference,
         });
     }
 

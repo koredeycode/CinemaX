@@ -13,12 +13,15 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     try {
-        const { bookingId } = await req.json();
+        const { refId } = await req.json();
         
         // Ensure Movie model is registered
         const _ = Movie;
 
-        const booking = await Booking.findById(bookingId)
+        // Strict lookup by referenceId
+        const query = { referenceId: refId };
+
+        const booking = await Booking.findOne(query)
             .populate({ path: 'movieId', select: 'title', strictPopulate: false })
             .lean();
 

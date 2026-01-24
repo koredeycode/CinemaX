@@ -11,18 +11,20 @@ import QRCode from "qrcode";
 
 export async function GET(
     req: NextRequest,
-    props: { params: Promise<{ bookingId: string }> }
+    props: { params: Promise<{ refId: string }> }
 ) {
     const params = await props.params;
     await dbConnect();
-    const { bookingId } = params;
+    const { refId } = params;
 
     try {
         // Ensure Movie model is registered
         const _ = Movie;
 
         // Use lean() to get plain object and bypass hydration issues
-        const booking = await Booking.findById(bookingId).lean() as any; 
+        let query = { referenceId: refId }; // Primary lookup by referenceId
+        
+        const booking = await Booking.findOne(query).lean() as any; 
         
         if (!booking) {
             return NextResponse.json({ error: "Booking not found" }, { status: 404 });
@@ -32,7 +34,7 @@ export async function GET(
         if (booking.user) {
             const userPayload = getUserFromRequest(req);
             if (!userPayload || userPayload.userId !== booking.user.toString()) {
-                logger.warn(`Unauthorized ticket access attempt: User ${userPayload?.userId} tried to access booking ${bookingId}`);
+                logger.warn(`Unauthorized ticket access attempt: User ${userPayload?.userId} tried to access booking ${booking._id}`);
                 return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
             }
         }
@@ -49,10 +51,11 @@ export async function GET(
         }
         
         if (!movie) {
-             logger.error(`Movie not found for booking ${bookingId}. Movie ID: ${booking.movieId}`);
+             logger.error(`Movie not found for booking ${refId}. Movie ID: ${booking.movieId}`);
              return NextResponse.json({ error: "Movie not found" }, { status: 404 });
         }
-        
+
+
         const dateObj = new Date(booking.date);
         const dateStr = dateObj.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const timeStr = booking.time;
@@ -77,8 +80,14 @@ export async function GET(
         const logoImage = await pdfDoc.embedPng(logoImageBytes);
         const logoDims = logoImage.scale(0.5); // Adjust scale as needed
 
-        // 3. Generate QR
-        const qrCodeDataUrl = await QRCode.toDataURL(bookingId, { margin: 1 });
+        // 3. Generate QR (Encode verification URL)
+        // Assuming the host is where the request came from, or hardcoded for now. 
+        // Ideally process.env.NEXT_PUBLIC_APP_URL but we don't have access to client env here easily without process.env
+        // We will construct relative or absolute if env var exists.
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        // Verification likely also wants ref
+        const verificationUrl = `${appUrl}/admin/verify?ref=${booking.referenceId}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { margin: 1 });
         const qrImage = await pdfDoc.embedPng(qrCodeDataUrl);
         
         // 4. Draw Design
@@ -96,10 +105,6 @@ export async function GET(
         });
         
         // Rotated "CINEMA TICKET" text on the red strip
-        // Rotated 90 deg CCW: Text flows UP. Baseline is on the Right, Ascenders point Left.
-        // Strip width is 40. Center is 20.
-        // Font size 22. Cap height ~15-16. 
-        // We need baseline at x ~ 28 to leave room for ascenders on the left (towards x=0).
         page.drawText('CINEMA TICKET', {
             x: 28, 
             y: 30, // Start from bottom
@@ -162,13 +167,18 @@ export async function GET(
         page.drawText('TIME', { x: mainX + 200, y: infoY + 20, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
         page.drawText(timeStr, { x: mainX + 200, y: infoY, size: 14, font: boldFont, color: darkGray });
 
-        // Hall / Screen (Static for now)
-        page.drawText('HALL', { x: mainX, y: infoY - 40, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
-        page.drawText('HALL 1', { x: mainX, y: infoY - 60, size: 14, font: boldFont, color: darkGray });
+        // Hall / Screen (Removed as per request)
+        // page.drawText('HALL', { x: mainX, y: infoY - 40, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
+        // page.drawText('HALL 1', { x: mainX, y: infoY - 60, size: 14, font: boldFont, color: darkGray });
+
+        // Reference ID Display
+        page.drawText('REF', { x: mainX, y: infoY - 40, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
+        page.drawText(booking.referenceId || "N/A", { x: mainX, y: infoY - 60, size: 14, font: boldFont, color: cinemaRed });
 
         // Guest
         page.drawText('GUEST', { x: mainX + 200, y: infoY - 40, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
-        const guestName = booking.guestDetails?.name || "Guest";
+        // Request: guest should be name not mail
+        const guestName = booking.guestDetails?.name || "Guest"; 
         page.drawText(guestName.length > 20 ? guestName.substring(0, 18) + "..." : guestName, 
             { x: mainX + 200, y: infoY - 60, size: 14, font: boldFont, color: darkGray }
         );
@@ -182,7 +192,7 @@ export async function GET(
             width: width - separatorX, height: 50,
             color: cinemaRed
         });
-        page.drawText('ADMIT ONE', {
+        page.drawText(`ADMIT ${booking.seats.length}`, {
             x: stubX + 35, y: height - 35,
             size: 16,
             font: boldFont,
@@ -193,8 +203,6 @@ export async function GET(
         page.drawText('SEAT', { x: stubX, y: height - 80, size: 10, font, color: rgb(0.5, 0.5, 0.5) });
         
         // Handle multiple seats - just show first or range. 
-        // For visual simplicity in a stub, displaying the first/primary seat or "3 Seats" is common. 
-        // We'll list them but prevent overflow.
         let seatText = booking.seats.join(", ");
         if (seatText.length > 15) seatText = booking.seats[0] + " +" + (booking.seats.length - 1);
         
@@ -218,7 +226,7 @@ export async function GET(
         return new NextResponse(Buffer.from(pdfBytes), {
             headers: {
                 "Content-Type": "application/pdf",
-                "Content-Disposition": `inline; filename="ticket-${bookingId}.pdf"`,
+                "Content-Disposition": `inline; filename="ticket-${refId}.pdf"`,
             },
         });
 

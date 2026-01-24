@@ -255,7 +255,7 @@ async function seed() {
             ],
             totalPrice: (movie.price * 2) + concessions[0].price + (concessions[2].price * 2),
             status: "confirmed",
-            paymentIntentId: "SEED-REF-001"
+            referenceId: "CX-SEED-001"
         });
 
         // Booking 2: Pending
@@ -268,7 +268,7 @@ async function seed() {
             seats: ["F10"],
             totalPrice: movies[1].price,
             status: "pending", // Emulate an abandoned checkout
-            paymentIntentId: "SEED-REF-002"
+            referenceId: "CX-SEED-002"
         });
 
         logger.info(`   - Created 2 sample bookings for ${user.email}`);

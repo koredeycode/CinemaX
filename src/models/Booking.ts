@@ -19,8 +19,8 @@ export interface IBooking extends Document {
     cost: number;
   }[];
   totalPrice: number;
+  referenceId: string;
   status: "pending" | "confirmed" | "cancelled";
-  paymentIntentId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -52,7 +52,7 @@ const BookingSchema: Schema = new Schema(
       enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
     },
-    paymentIntentId: { type: String },
+    referenceId: { type: String, required: true, unique: true, index: true },
   },
   { timestamps: true }
 );

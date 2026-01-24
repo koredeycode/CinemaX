@@ -18,29 +18,28 @@ interface Booking {
   guestDetails?: {
       name: string;
   };
-   paymentIntentId: string; // reference
+   referenceId: string;
 }
 
 export default function TicketPage() {
-  const { id } = useParams();
+  const { refId } = useParams(); 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/user/bookings") 
+    fetch(`/api/bookings/${refId}`) 
       .then(res => res.json())
       .then(data => {
          if (data.success) {
-             const found = data.bookings.find((b: { _id: string; }) => b._id === id);
-             setBooking(found || null);
+             setBooking(data.booking);
          }
          setLoading(false);
       });
-  }, [id]);
+  }, [refId]);
 
   const handleDownload = () => {
       // Use the backend API which generates the consistent landscape PDF
-      window.open(`/api/tickets/${id}`, '_blank');
+      window.open(`/api/tickets/${refId}`, '_blank');
   };
 
   if (loading) return (
@@ -67,13 +66,14 @@ export default function TicketPage() {
     <div className="max-w-4xl mx-auto p-4">
        <div className="mb-8 text-center">
            <h1 className="text-3xl font-bold text-white mb-2">Your Ticket</h1>
+           <p className="text-xl text-primary font-mono mb-2">{booking.referenceId}</p>
            <p className="text-gray-400">Your ticket is ready. You can view it below or download it.</p>
        </div>
 
        {/* PDF Viewer Iframe */}
        <div className="w-full aspect-[2.4/1] min-h-[300px] bg-gray-800 rounded-3xl overflow-hidden shadow-2xl">
             <iframe 
-                src={`/api/tickets/${id}#toolbar=0&navpanes=0&scrollbar=0`}
+                src={`/api/tickets/${refId}#toolbar=0&navpanes=0&scrollbar=0`}
                 className="w-full h-full border-0"
                 title="Ticket PDF"
             />

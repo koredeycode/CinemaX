@@ -37,7 +37,7 @@ export async function POST(req: Request) {
 
         // Update booking status and ensure email matches payer
         await Booking.updateMany(
-            { paymentIntentId: reference },
+            { referenceId: reference },
             { 
                 $set: { 
                     status: "confirmed",

@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 
 interface Booking {
   _id: string;
+  referenceId: string;
   movieId: {
      title: string;
      posterUrl: string;
@@ -107,7 +108,7 @@ export default function MyBookingsPage() {
                             <p className="text-sm text-gray-500">{booking.seats.length} Tickets • {booking.seats.join(", ")}</p>
                             {booking.status === 'confirmed' ? (
                                 <Link 
-                                    href={`/dashboard/tickets/${booking._id}`}
+                                    href={`/dashboard/tickets/${booking.referenceId}`}
                                     className="text-sm bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                                 >
                                     View Ticket

@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     await dbConnect();
 
     // Check if bookings are already confirmed to avoid redundant updates
-    const existingBookings = await Booking.find({ paymentIntentId: reference });
+    const existingBookings = await Booking.find({ referenceId: reference });
     
     if (existingBookings.length === 0) {
         return NextResponse.json(
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
 
     // Update bookings with confirmed status AND the verified email
     const result = await Booking.updateMany(
-      { paymentIntentId: reference },
+      { referenceId: reference },
       { 
           $set: { 
               status: "confirmed",
