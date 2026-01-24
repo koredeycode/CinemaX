@@ -95,21 +95,23 @@ function AdminBookingsContent() {
                         ) : bookings.length > 0 ? (
                             bookings.map((booking: any) => (
                                 <tr key={String(booking._id)} className="hover:bg-gray-800/50">
-                                    <td className="px-6 py-4 font-mono text-xs text-gray-500 hover:text-white transition-colors">
-                                        {String(booking._id).substring(0, 8)}...
+                                    <td className="px-6 py-4 font-mono text-xs text-primary font-bold hover:text-white transition-colors">
+                                        {booking.referenceId || booking._id}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-white font-medium">{booking.guestDetails?.name || "N/A"}</div>
-                                        <div className="text-xs">{booking.guestDetails?.email || booking.userEmail}</div>
+                                        <div className="text-white font-medium">{booking.guestDetails?.name || "Guest"}</div>
+                                        <div className="text-xs text-gray-500">{booking.guestDetails?.email || booking.userEmail}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {booking.movieId?.title || "Unknown"}
-                                        <div className="text-xs text-gray-500">
+                                        <div className="text-white">{booking.movieId?.title || "Unknown"}</div>
+                                        <div className="text-xs text-gray-500 mt-1">
                                            {(() => {
                                                 if (!booking.date || !booking.time) return "N/A";
                                                 try {
-                                                    const dateStr = new Date(booking.date).toLocaleDateString();
-                                                    return `${dateStr} @ ${booking.time}`;
+                                                    const dateStr = new Date(booking.date).toLocaleDateString(undefined, {
+                                                        weekday: 'short', month: 'short', day: 'numeric'
+                                                    });
+                                                    return `${dateStr} • ${booking.time}`;
                                                 } catch (e) {
                                                     return `${booking.date} @ ${booking.time}`;
                                                 }
@@ -118,7 +120,7 @@ function AdminBookingsContent() {
                                     </td>
                                     <td className="px-6 py-4">{booking.seats.join(", ")}</td>
                                     <td className="px-6 py-4 text-primary font-bold">₦{booking.totalPrice?.toLocaleString()}</td>
-                                    <td className="px-6 py-4">{new Date(booking.createdAt).toLocaleDateString()}</td>
+                                    <td className="px-6 py-4 text-gray-400 font-mono text-xs">{new Date(booking.createdAt).toLocaleString()}</td>
                                 </tr>
                             ))
                         ) : (

@@ -35,7 +35,7 @@ export default function Sidebar({ title, subtitle, items, isOpen, onClose }: Sid
       )}
 
       <aside 
-        className={`fixed top-16 bottom-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-800 flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 md:static
+        className={`fixed top-16 bottom-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-800 flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 md:fixed
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >

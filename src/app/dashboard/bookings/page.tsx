@@ -95,13 +95,13 @@ export default function MyBookingsPage() {
                                     })()}
                                 </p>
                             </div>
-                            <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
-                                booking.status === 'confirmed' ? 'bg-green-500/20 text-green-500' :
-                                booking.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :
-                                'bg-red-500/20 text-red-500'
+                            <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                                booking.status === 'confirmed' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
+                                booking.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
+                                'bg-red-500/10 text-red-500 border border-red-500/20'
                             }`}>
                                 {booking.status}
-                            </span>
+                            </div>
                         </div>
                         
                         <div className="mt-2 flex justify-between items-end">

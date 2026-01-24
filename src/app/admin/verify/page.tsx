@@ -99,7 +99,7 @@ export default function VerifyPage() {
                         </div>
                         <div className="flex justify-between border-b border-white/10 pb-2">
                             <span className="text-gray-400">Movie</span>
-                            <span className="text-white font-medium">{result.movieId?.title || "Unknown"}</span>
+                            <span className="text-white font-medium">{result.movieId?.title || "Movie"}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/10 pb-2">
                             <span className="text-gray-400">Date</span>

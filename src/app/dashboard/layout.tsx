@@ -63,7 +63,7 @@ export default function DashboardLayout({
         />
         
         {/* Main content - pushed right by 64 (16rem/256px) on Desktop */}
-        <main className="flex-1 min-w-0 md:pl-64">
+        <main className="flex-1 min-w-0 md:ml-64">
             <div className="p-4 md:p-8 max-w-6xl mx-auto">
                 {children}
             </div>
