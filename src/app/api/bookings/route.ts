@@ -61,6 +61,28 @@ export async function POST(req: Request) {
 
     // Create a Booking document for each item in the cart
     for (const item of cart) {
+        // --- Security Check: Check-and-Set ---
+        // Verify that none of these seats are already booked.
+        // This is the final source of truth, overruling any socket locks.
+        const existingBooking = await Booking.findOne({
+            movieId: item.movieId,
+            date: item.date,
+            time: item.time,
+            status: { $in: ['confirmed', 'pending'] },
+            seats: { $in: item.seats }
+        });
+
+        if (existingBooking) {
+            // Find which seats are taken
+            const takenSeats = item.seats.filter((s: string) => existingBooking.seats.includes(s));
+            return NextResponse.json({ 
+                success: false, 
+                message: `Booking failed. The following seats were just taken: ${takenSeats.join(', ')}`,
+                errorType: 'SEAT_TAKEN'
+            }, { status: 409 });
+        }
+        // -------------------------------------
+
         // Calculate total price for this item
         const seatsCost = item.seats.length * item.price;
         const snacksCost = item.concessions.reduce((acc: number, c: any) => acc + (c.price * c.quantity), 0);

@@ -1,6 +1,7 @@
 import { Server as HttpServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import logger from "./logger";
+import { RateLimiter } from "./ratelimit";
 import redis from "./redis.ts";
 
 export function initSocket(httpServer: HttpServer) {
@@ -49,6 +50,16 @@ export function initSocket(httpServer: HttpServer) {
     });
 
     socket.on("select-seat", async ({ showtimeId, seatLabel, userId }: { showtimeId: string, seatLabel: string, userId: string }) => {
+        // Rate Limiting Check
+        const clientIp = socket.handshake.address; // Basic IP check
+        // Limit: 10 selections per minute
+        const isAllowed = await RateLimiter.checkLimit(clientIp, "select-seat", 10, 60);
+
+        if (!isAllowed) {
+            socket.emit("seat-error", { message: "You are selecting seats too fast. Please wait a moment." });
+            return;
+        }
+
         // Check user's current lock count
         const pattern = `lock:showtime:${showtimeId}:seat:*`;
         let cursor = "0";

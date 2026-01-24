@@ -23,6 +23,7 @@ export interface BookingSession {
     email: string;
     phone: string;
   };
+  expiresAt: number | null; // Timestamp when reservation expires
 }
 
 interface CartState {
@@ -85,6 +86,7 @@ export const useCartStore = create<CartState>()(
               seats: [],
               concessions: [],
               guest: { name: "", email: "", phone: "" },
+              expiresAt: null
             },
           };
         });
@@ -93,8 +95,26 @@ export const useCartStore = create<CartState>()(
       updateSeats: (seats) => {
         set((state) => {
           if (!state.currentSession) return state;
+          
+          // Logic for timer:
+          // 1. If we have seats and NO expiry, start timer (5 mins)
+          // 2. If seats kept, keep expiry
+          // 3. If seats cleared, clear expiry
+          
+          let newExpiry = state.currentSession.expiresAt;
+          
+          if (seats.length > 0 && !newExpiry) {
+              newExpiry = Date.now() + (5 * 60 * 1000); // 5 minutes from now
+          } else if (seats.length === 0) {
+              newExpiry = null;
+          }
+
           return {
-            currentSession: { ...state.currentSession, seats },
+            currentSession: { 
+                ...state.currentSession, 
+                seats,
+                expiresAt: newExpiry
+            },
           };
         });
       },

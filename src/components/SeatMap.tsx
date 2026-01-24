@@ -25,8 +25,7 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
   const [error, setError] = useState<string | null>(null);
   
   // Timer State
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  // Timer State Removed
 
   const socketRef = useRef<Socket | null>(null);
   const showtimeId = `${movie._id}:${date}:${time}`;
@@ -87,75 +86,6 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
     };
   }, [showtimeId]);
 
-
-  // Timer Logic
-  useEffect(() => {
-      if (selectedSeats.length > 0 && timeLeft === null) {
-          // Start timer if not running
-          setTimeLeft(300); // 5 minutes
-      } else if (selectedSeats.length === 0) {
-          // Stop timer if no seats
-          setTimeLeft(null);
-          if (timerRef.current) clearInterval(timerRef.current);
-      }
-  }, [selectedSeats.length, timeLeft]);
-
-  useEffect(() => {
-      if (timeLeft !== null && timeLeft > 0) {
-          timerRef.current = setInterval(() => {
-              setTimeLeft(prev => {
-                  if (prev && prev > 1) return prev - 1;
-                  return 0;
-              });
-          }, 1000);
-      } else if (timeLeft === 0) {
-          // Time expired!
-          if (timerRef.current) clearInterval(timerRef.current);
-          handleExpiry();
-      }
-
-      return () => {
-          if (timerRef.current) clearInterval(timerRef.current);
-      };
-  }, [timeLeft]);
-
-  const handleExpiry = () => {
-      toast.warning("Seat reservation expired! Please try again.");
-      
-      // Release all selected seats
-      selectedSeats.forEach(seat => {
-          socketRef.current?.emit("release-seat", {
-              showtimeId,
-              seatLabel: seat
-          });
-      });
-      
-      setSelectedSeats([]);
-      updateSeats([]);
-      setTimeLeft(null);
-  };
-
-  const formatTime = (seconds: number) => {
-      const m = Math.floor(seconds / 60);
-      const s = seconds % 60;
-      return `${m}:${s.toString().padStart(2, '0')}`;
-  };
-
-
-  // Fetch Availability
-  useEffect(() => {
-      if(movie && date && time) {
-          fetch(`/api/bookings/availability?movieId=${movie._id}&date=${date}&time=${time}`)
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    setBookedSeats(data.bookedSeats);
-                }
-            })
-            .catch(err => console.error("Failed to load seats", err));
-      }
-  }, [movie, date, time]);
-
   useEffect(() => {
     console.log("SeatMap - Sync Effect", { 
         currentId: currentSession?.movieId, 
@@ -180,7 +110,10 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
             movie.price || 4500 // Default price fallback
         );
     }
-  }, [movie._id, date, time, currentSession]); // Check dependencies carefully
+  }, [movie._id, date, time, currentSession]);
+
+
+  // Check dependencies carefully
 
   const handleSeatClick = (row: number, col: number) => {
     const seatLabel = `${String.fromCharCode(65 + row)}${col + 1}`;
@@ -223,32 +156,23 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
 
   const handleConfirm = () => {
     updateSeats(selectedSeats);
-    // Passing params in URL not really needed if store has it, but good for linking?
-    // Actually we just need to go to food. State is in store.
     router.push(`/booking/food`);
   };
 
   const halfCols = Math.ceil(cols / 2);
 
+
+
   return (
     <div className="w-full max-w-5xl mx-auto md:p-8 p-4 rounded-xl min-h-[600px] flex flex-col items-center">
       
-      {/* Timer Bar */}
-      {timeLeft !== null && (
-          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gray-900/90 border border-yellow-500/30 backdrop-blur-md text-white px-6 py-2 rounded-full shadow-xl flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-300">
-               <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
-               <span className="text-sm font-medium text-gray-300">Seats reserved for:</span>
-               <span className={clsx("font-mono font-bold text-lg tab-num", timeLeft < 60 ? "text-red-500" : "text-yellow-400")}>
-                   {formatTime(timeLeft)}
-               </span>
-          </div>
-      )}
-
       {error && (
         <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-center text-sm w-full max-w-md">
             {error}
         </div>
       )}
+
+
 
       {/* Screen - SVG Curve */}
       <div className="w-full max-w-2xl mb-12 relative flex flex-col items-center px-4">

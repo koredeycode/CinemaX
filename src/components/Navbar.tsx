@@ -9,6 +9,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 
+import SessionTimer from "./SessionTimer";
+
 export default function Navbar() {
   const pathname = usePathname();
   const { user } = useAuthStore();
@@ -25,6 +27,7 @@ export default function Navbar() {
 
   return (
     <nav className="border-b border-gray-800 bg-black/80 sticky top-0 z-50 backdrop-blur-md">
+      <SessionTimer />
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity shrink-0">
           <img src="/icon.png" alt="CinemaX" className="w-10 h-10 object-contain" />
