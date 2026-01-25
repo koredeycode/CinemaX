@@ -1,9 +1,20 @@
 import logger from "@/lib/logger";
+import { RateLimiter } from "@/lib/ratelimit";
 import { stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
+    
+    const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+    const isAllowed = await RateLimiter.checkLimit(ip, "checkout", 10, 60);
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { error: "Too many payment attempts. Please wait a moment." },
+        { status: 429 }
+      );
+    }
     const { amount } = await req.json();
 
     if (stripe) {

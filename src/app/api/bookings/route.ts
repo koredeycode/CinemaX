@@ -1,5 +1,6 @@
 import { getAdminUser } from '@/lib/auth';
 import dbConnect from '@/lib/db';
+import { RateLimiter } from "@/lib/ratelimit";
 import Booking from '@/models/Booking';
 import Movie from '@/models/Movie';
 import { NextRequest, NextResponse } from 'next/server';
@@ -43,6 +44,16 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: Request) {
+  const ip = (req.headers.get("x-forwarded-for") as string) || "127.0.0.1";
+  const isAllowed = await RateLimiter.checkLimit(ip, "create-booking", 10, 60);
+
+  if (!isAllowed) {
+    return NextResponse.json(
+      { success: false, message: "Too many bookings created. Please wait a moment." },
+      { status: 429 }
+    );
+  }
+
   try {
     await dbConnect();
     

@@ -1,6 +1,7 @@
 import { hashPassword, signForUser } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import logger from "@/lib/logger";
+import { RateLimiter } from "@/lib/ratelimit";
 import User from "@/models/User";
 import { serialize } from "cookie";
 import { NextRequest, NextResponse } from "next/server";
@@ -10,6 +11,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const { name, email, password } = await req.json();
+
+    const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+    const isAllowed = await RateLimiter.checkLimit(ip, "register", 3, 3600);
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { error: "Too many registration attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     if (!name || !email || !password) {
       return NextResponse.json(
