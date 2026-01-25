@@ -2,7 +2,6 @@ import { getAdminUser } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { RateLimiter } from "@/lib/ratelimit";
 import Booking from '@/models/Booking';
-import Movie from '@/models/Movie';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
@@ -21,15 +20,12 @@ export async function GET(req: NextRequest) {
           { userEmail: { $regex: search, $options: "i" } },
           { "guestDetails.name": { $regex: search, $options: "i" } },
           { "guestDetails.email": { $regex: search, $options: "i" } },
-          { _id: { $regex: search, $options: "i" } } // Maybe support ID search too? usually MongoIDs are hex but regex works on string rep in mongoose often or fails. Safe to keep string fields.
-          // Note: _id is ObjectId, regex might not work directly. Let's skip _id regex for now unless we cast. 
-          // We can try exact match if it looks like an ID.
+          { _id: { $regex: search, $options: "i" } }
       ];
   }
 
   try {
-     // Ensure Movie model is registered for populate
-     const _ = Movie;
+
 
     const bookings = await Booking.find(query)
         .populate({ path: 'movieId', select: 'title posterUrl', strictPopulate: false })

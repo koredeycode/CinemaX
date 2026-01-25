@@ -2,7 +2,6 @@ import { getUserFromRequest } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import logger from "@/lib/logger";
 import Booking from "@/models/Booking";
-import Movie from "@/models/Movie";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
 
@@ -24,8 +23,7 @@ export async function GET(req: Request) {
 
     logger.info(`Fetching bookings for user: ${user.email}`);
 
-    // Ensure Movie model is registered
-    const _ = Movie;
+
 
     // Fetch bookings for this user by EMAIL
     // Use strictPopulate: false as a safeguard against schema mismatches, and lean objects.

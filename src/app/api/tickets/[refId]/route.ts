@@ -18,8 +18,7 @@ export async function GET(
     const { refId } = params;
 
     try {
-        // Ensure Movie model is registered
-        const _ = Movie;
+
 
         // Use lean() to get plain object and bypass hydration issues
         let query = { referenceId: refId }; // Primary lookup by referenceId
@@ -81,9 +80,6 @@ export async function GET(
         const logoDims = logoImage.scale(0.5); // Adjust scale as needed
 
         // 3. Generate QR (Encode verification URL)
-        // Assuming the host is where the request came from, or hardcoded for now. 
-        // Ideally process.env.NEXT_PUBLIC_APP_URL but we don't have access to client env here easily without process.env
-        // We will construct relative or absolute if env var exists.
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
         // Verification likely also wants ref
         const verificationUrl = `${appUrl}/admin/verify?ref=${booking.referenceId}`;
@@ -166,10 +162,6 @@ export async function GET(
         // Time
         page.drawText('TIME', { x: mainX + 200, y: infoY + 20, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
         page.drawText(timeStr, { x: mainX + 200, y: infoY, size: 14, font: boldFont, color: darkGray });
-
-        // Hall / Screen (Removed as per request)
-        // page.drawText('HALL', { x: mainX, y: infoY - 40, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
-        // page.drawText('HALL 1', { x: mainX, y: infoY - 60, size: 14, font: boldFont, color: darkGray });
 
         // Reference ID Display
         page.drawText('REF', { x: mainX, y: infoY - 40, size: 9, font, color: rgb(0.5, 0.5, 0.5) });

@@ -3,7 +3,6 @@ import dbConnect from "@/lib/db";
 import Booking from "@/models/Booking";
 import { NextRequest, NextResponse } from "next/server";
 
-import Movie from "@/models/Movie";
 
 export async function POST(req: NextRequest) {
     if (!getAdminUser(req)) {
@@ -15,8 +14,7 @@ export async function POST(req: NextRequest) {
     try {
         const { refId } = await req.json();
         
-        // Ensure Movie model is registered
-        const _ = Movie;
+
 
         // Strict lookup by referenceId
         const query = { referenceId: refId };

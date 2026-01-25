@@ -28,12 +28,49 @@ export default function DashboardPage() {
             const res = await fetch("/api/user/bookings");
             const data = await res.json();
             if (data.success && data.bookings.length > 0) {
-                // Determine upcoming logic: find closest future booking? 
-                // Currently API returns all sorted by createdAt desc.
-                // Simple logic: grab the latest booking as "Upcoming".
-                // Ideally we filter by date >= today, but date format might vary.
-                // Let's just show the most recent one for now.
-                setUpcomingBooking(data.bookings[0]);
+                const now = new Date();
+                
+                // Helper to parse booking date string and time string into a Date object
+                const getBookingDate = (b: Booking) => {
+                    try {
+                        // Assuming b.date is parsable and b.time is roughly "HH:MM" or "HH:MM AM/PM"
+                        // If b.date is an ISO string, it might have time component 00:00:00
+                        const d = new Date(b.date);
+                        
+                        // Attempt to parse time if it exists
+                        if (b.time) {
+                           // simple check for AM/PM
+                           const isPM = b.time.toLowerCase().includes('pm');
+                           const isAM = b.time.toLowerCase().includes('am');
+                           let [hoursStr, minutesStr] = b.time.replace(/(am|pm)/i, '').trim().split(':');
+                           
+                           let hours = parseInt(hoursStr, 10);
+                           const minutes = parseInt(minutesStr, 10) || 0;
+
+                           if (isPM && hours < 12) hours += 12;
+                           if (isAM && hours === 12) hours = 0;
+                           
+                           if (!isNaN(hours)) {
+                               d.setHours(hours);
+                               d.setMinutes(minutes);
+                           }
+                        }
+                        return d;
+                    } catch (e) {
+                        return new Date(0); // invalid dates go to epoch
+                    }
+                };
+
+                const upcoming = data.bookings
+                    .map((b: Booking) => ({ ...b, parsedDate: getBookingDate(b) }))
+                    .filter((b: any) => b.parsedDate > now)
+                    .sort((a: any, b: any) => a.parsedDate.getTime() - b.parsedDate.getTime());
+
+                if (upcoming.length > 0) {
+                    setUpcomingBooking(upcoming[0]);
+                } else {
+                    setUpcomingBooking(null);
+                }
             }
         } catch (error) {
             console.error("Failed to fetch bookings:", error);

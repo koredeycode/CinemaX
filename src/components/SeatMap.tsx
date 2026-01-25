@@ -23,9 +23,6 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
   const [lockedSeats, setLockedSeats] = useState<{ [key: string]: string }>({}); // seat -> userId
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  
-  // Timer State
-  // Timer State Removed
 
   const socketRef = useRef<Socket | null>(null);
   const showtimeId = `${movie._id}:${date}:${time}`;
