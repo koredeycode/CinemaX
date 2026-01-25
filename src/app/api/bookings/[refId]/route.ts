@@ -20,7 +20,7 @@ export async function GET(
             .populate({ path: 'movieId', select: 'title posterUrl', strictPopulate: false })
             .lean() as any;
         
-            console.log({booking})
+
         
         if (!booking) {
             return NextResponse.json({ success: false, error: "Booking not found" }, { status: 404 });

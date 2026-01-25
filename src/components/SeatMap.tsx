@@ -58,17 +58,17 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
     const socket = socketRef.current;
 
     socket.on("connect", () => {
-        console.log("Connected to socket server");
+
         socket.emit("join-showtime", showtimeId);
     });
 
     socket.on("seat-locked", ({ seatLabel, userId: lockerId }: { seatLabel: string, userId: string }) => {
-        console.log(`[SeatMap] Seat locked event: ${seatLabel} by ${lockerId}`);
+
         setLockedSeats(prev => ({ ...prev, [seatLabel]: lockerId }));
     });
 
     socket.on("seat-released", ({ seatLabel }: { seatLabel: string }) => {
-        console.log(`[SeatMap] Seat released event: ${seatLabel}`);
+
         setLockedSeats(prev => {
             const newLocked = { ...prev };
             delete newLocked[seatLabel];
@@ -87,21 +87,14 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
   }, [showtimeId]);
 
   useEffect(() => {
-    console.log("SeatMap - Sync Effect", { 
-        currentId: currentSession?.movieId, 
-        currentDate: currentSession?.date, 
-        currentTime: currentSession?.time,
-        propId: movie._id,
-        propDate: date,
-        propTime: time
-    });
+
 
     // Check if session matches
     if (String(currentSession?.movieId) === String(movie._id) && currentSession?.date === date && currentSession?.time === time) {
-        console.log("SeatMap - Session matched, setting seats:", currentSession.seats);
+
         setSelectedSeats(currentSession.seats);
     } else {
-        console.log("SeatMap - Session mismatch, starting new...");
+
         // Start new session
         startSession(
             movie,

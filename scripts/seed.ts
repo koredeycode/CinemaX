@@ -151,6 +151,18 @@ const sampleMovies = [
     runtime: 145,
     genres: ["Sci-Fi", "Adventure", "Action"],
     status: "now_showing"
+  },
+  {
+    title: "Avatar: Fire and Ash",
+    slug: "avatar-fire-and-ash",
+    description: "In the wake of the devastating war against the RDA and the loss of their eldest son, Jake Sully and Neytiri face a new threat on Pandora: the Ash People, a violent and power-hungry Na'vi tribe led by the ruthless Varang. Jake's family must fight for their survival and the future of Pandora in a conflict that pushes them to their emotional and physical limits.",
+    posterUrl: "https://image.tmdb.org/t/p/original/5bxrxnRaxZooBAxgUVBZ13dpzC7.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/original/u8DU5fkLoM5tTRukzPC31oGPxaQ.jpg",
+    trailerUrl: "https://www.youtube.com/embed/nb_fFj_0rq8",
+    rating: "PG-13",
+    runtime: 197, 
+    genres: ["Sci-Fi", "Adventure", "Action"],
+    status: "coming_soon"
   }
 ];
 

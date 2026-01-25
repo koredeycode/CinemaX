@@ -60,10 +60,10 @@ export const useCartStore = create<CartState>()(
             s => String(s.movieId) === movieId && s.date === date && s.time === time
           );
           
-          console.log("startSession - Existing Check:", { movieId, date, time, found: !!existingInCart });
+
 
           if (existingInCart) {
-             console.log("startSession - Loading existing session:", existingInCart);
+
              return {
                  currentSession: { ...existingInCart }
              };
@@ -150,11 +150,7 @@ export const useCartStore = create<CartState>()(
                      s.time === state.currentSession!.time
             );
 
-            console.log("addToCart - Merge Check:", { 
-                currentId: state.currentSession?.movieId,
-                existingIndex,
-                hasItems 
-            });
+
 
             let newCart = [...state.cart];
 

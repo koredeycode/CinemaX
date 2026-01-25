@@ -41,8 +41,7 @@ export default function CheckoutClient() {
       setReference(generateReference());
   }, [cart.length, total]);
 
-  // Debug logging
-  console.log("Paystack Public Key:", process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ? "Present" : "Missing");
+
 
   const [itemToRemove, setItemToRemove] = useState<number | null>(null);
 
@@ -120,12 +119,11 @@ export default function CheckoutClient() {
   };
 
   const handlePaystackSuccessAction = async (reference: any) => {
-      console.log("Paystack SUCCESS Callback fired!", reference);
+
       const toastId = toast.loading("Processing booking...");
 
       try {
             // 1. Create Booking in Backend (Now that payment is confirmed)
-            console.log("Creating booking for verified payment:", reference);
             // We use the reference returned from Paystack or our own if they match. 
             // reference.reference is usually the string.
             const paymentRef = reference.reference; 

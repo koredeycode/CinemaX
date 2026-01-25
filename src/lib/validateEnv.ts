@@ -27,8 +27,5 @@ export function validateEnv() {
     process.exit(1);
   }
 
-  console.log(
-    "\x1b[32m%s\x1b[0m", // Green color
-    "✅ All required environment variables are present.\n"
-  );
+
 }
