@@ -73,9 +73,15 @@ export default function SeatMap({ movie, date, time, userId }: SeatMapProps) {
         });
     });
 
-    socket.on("seat-error", ({ message }: { message: string }) => {
+    socket.on("seat-error", ({ message, seatLabel }: { message: string, seatLabel?: string }) => {
         toast.error(message);
-        // Revert selection if needed (though we check before selecting)
+        if (seatLabel) {
+             setSelectedSeats(prev => {
+                 const newSelection = prev.filter(s => s !== seatLabel);
+                 updateSeats(newSelection); // Sync with store
+                 return newSelection;
+             });
+        }
     });
 
     return () => {

@@ -56,7 +56,7 @@ export function initSocket(httpServer: HttpServer) {
         const isAllowed = await RateLimiter.checkLimit(clientIp, "select-seat", 10, 60);
 
         if (!isAllowed) {
-            socket.emit("seat-error", { message: "You are selecting seats too fast. Please wait a moment." });
+            socket.emit("seat-error", { message: "You are selecting seats too fast. Please wait a moment.", seatLabel });
             return;
         }
 
@@ -86,7 +86,7 @@ export function initSocket(httpServer: HttpServer) {
             } while (cursor !== "0");
 
             if (userLockCount >= 5) {
-                socket.emit("seat-error", { message: "You can only select up to 5 seats" });
+                socket.emit("seat-error", { message: "You can only select up to 5 seats", seatLabel });
                 return;
             }
         } catch (err) {
@@ -97,15 +97,16 @@ export function initSocket(httpServer: HttpServer) {
         // Lock seat in Redis
         // Key: showtime:{id}:seat:{label}
         const lockKey = `lock:showtime:${showtimeId}:seat:${seatLabel}`;
-        const isLocked = await redis.get(lockKey);
+        // Try to acquire lock atomically
         
-        if (isLocked) {
-             socket.emit("seat-error", { message: "Seat already selected" });
+        // "NX" -> Set if Not eXists
+        const result = await redis.set(lockKey, userId, "EX", 300, "NX");
+        
+        if (!result) {
+             // Lock failed (already locked by someone else)
+             socket.emit("seat-error", { message: "Seat already selected", seatLabel });
              return;
         }
-
-        // Set lock for 5 minutes (300 seconds)
-        await redis.set(lockKey, userId, "EX", 300);
         
         // Broadcast to room
         io.to(showtimeId).emit("seat-locked", { seatLabel, userId });
