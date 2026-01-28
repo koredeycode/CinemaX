@@ -23,5 +23,5 @@ services:
         fromService:
           type: web
           name: cinemax
-          property: url
+          property: host
     plan: free

@@ -1,10 +1,11 @@
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/Motion";
 import MovieCard from "@/components/MovieCard";
+import { getApiUrl } from "@/lib/getApiUrl";
 import { IMovie } from "@/models/Movie";
 import Link from "next/link";
 
 async function getMovies(search?: string): Promise<IMovie[]> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const apiUrl = getApiUrl();
   
   try {
     const url = new URL(`${apiUrl}/api/movies`);

@@ -1,5 +1,6 @@
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/Motion";
 import MovieCarousel from "@/components/MovieCarousel";
+import { getApiUrl } from "@/lib/getApiUrl";
 
 import MovieCard from "@/components/MovieCard";
 import { IMovie } from "@/models/Movie";
@@ -8,7 +9,7 @@ import { IMovie } from "@/models/Movie";
 export const dynamic = "force-dynamic";
 
 async function getMovies(status = "now_showing"): Promise<IMovie[]> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const apiUrl = getApiUrl();
   
   try {
     const url = new URL(`${apiUrl}/api/movies`);

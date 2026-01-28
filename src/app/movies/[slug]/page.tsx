@@ -1,11 +1,12 @@
 import BookingSelector from "@/components/BookingSelector";
 import { FadeIn } from "@/components/Motion";
 import MovieHero from "@/components/MovieHero";
+import { getApiUrl } from "@/lib/getApiUrl";
 import { IMovie } from "@/models/Movie";
 import { notFound } from "next/navigation";
 
 async function getMovie(id: string): Promise<IMovie | null> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const apiUrl = getApiUrl();
   try {
     const res = await fetch(`${apiUrl}/api/movies/${id}`, { cache: "no-store" });
     if (!res.ok) return null;
