@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: cinemax
+    env: node
+    buildCommand: pnpm install; pnpm build
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: ENABLE_PNPM
+        value: 1
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: cinemax
+          property: url
+    plan: free
